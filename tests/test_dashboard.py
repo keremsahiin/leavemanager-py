@@ -38,7 +38,8 @@ def test_counters_with_seed_data(client: FlaskClient) -> None:
 
 
 def test_balance_table_with_seed_data(client: FlaskClient) -> None:
-    """PB-2."""
+    """PB-2. Değerler D4 (Kullanılan takvim günü) ve D5'e (Kalan'dan bekleyen düşülmez) bağlıdır;
+    o düzeltmeler bu beklentiyi de bilinçli olarak değiştirir (docs/domain.md)."""
     response = client.get("/")
     assert response.status_code == 200
     page = parse(response.text)
@@ -52,7 +53,6 @@ def test_balance_table_with_seed_data(client: FlaskClient) -> None:
         (date(2008, 12, 31), 0),  # kıdem 0
         (date(2013, 6, 1), 14),  # kıdem 5
         (date(2014, 6, 1), 20),  # kıdem 6
-        (date(2024, 1, 1), 26),  # yıl farkı 16
         (date(2024, 6, 1), 26),  # kıdem 16
     ],
 )
@@ -76,6 +76,7 @@ def test_d2_15_years_gives_20_days(client_on: Callable[[date], FlaskClient]) -> 
     [
         (AYSE, date(2009, 1, 1), 14),  # yıl farkı 1, tamamlanan yıl 0
         (AYSE, date(2014, 1, 1), 20),  # yıl farkı 6, tamamlanan yıl 5
+        (AYSE, date(2024, 1, 1), 26),  # yıl farkı 16, tamamlanan yıl 15 — D2 ile etkileşir
         (ZEYNEP, date(2025, 1, 2), 14),  # yıl farkı 1, tamamlanan yıl 0
     ],
 )
@@ -106,7 +107,8 @@ def test_d5_pending_days_not_deducted(client: FlaskClient) -> None:
     """PB-4 — bilinen sapma D5 (docs/domain.md): bekleyen talepler bakiyeden düşülmez.
     Ayse'nin 3 günlük, Mehmet'in 3 günlük bekleyen talebi var; Kalan = Hak − Kullanılan.
 
-    Bugünkü davranışı sabitler; D5 düzeltmesi bu testi bilinçli olarak değiştirir.
+    Bugünkü davranışı sabitler; D5 ve D4 (Kullanılan takvim günü) düzeltmeleri bu testi
+    bilinçli olarak değiştirir.
     """
     table = balances(client)
     assert table[AYSE] == (26, 12, 14)
@@ -116,6 +118,7 @@ def test_d5_pending_days_not_deducted(client: FlaskClient) -> None:
 def test_d14_remaining_can_go_negative(client_on: Callable[[date], FlaskClient]) -> None:
     """PB-4 — bilinen sapma D14 (docs/domain.md): Kalan negatife düşebilir (I-1 ihlali).
 
-    Bugünkü davranışı sabitler; D14 düzeltmesi bu testi bilinçli olarak değiştirir.
+    Bugünkü davranışı sabitler; D14, D4 (Kullanılan takvim günü) ve D5 (bekleyen düşülmez)
+    düzeltmeleri bu testi bilinçli olarak değiştirir.
     """
     assert balances(client_on(date(2008, 12, 31)))[AYSE] == (0, 12, -12)

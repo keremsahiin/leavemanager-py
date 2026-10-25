@@ -90,7 +90,8 @@ def test_d9_insufficient_balance_shows_internal_error_text(
     """PB-10 — bilinen sapma D9 (docs/domain.md, docs/security.md): hata mesajı dahili kod ve
     dahili telefon numarası içerir.
 
-    Bugünkü davranışı sabitler; D9 düzeltmesi bu testi bilinçli olarak değiştirir.
+    Bugünkü davranışı sabitler; D9 düzeltmesi bu testi bilinçli olarak değiştirir. Zeynep
+    durumu ayrıca D4'e bağlıdır (15 takvim günü = 11 iş günü, Kalan 14'e sığar).
     """
     form = {"employee_id": employee_id, "start": start, "end": end, "reason": "x"}
     response = client.post("/new", data=form)
@@ -103,7 +104,8 @@ def test_d6_equal_to_remaining_is_silently_dropped(client: FlaskClient) -> None:
     """PB-11 — bilinen sapma D6 (docs/domain.md): talep günü Kalan'a eşitse (Zeynep, 14 gün)
     kayıt oluşmaz ve hata gösterilmez (BR-5: kabul edilmeli).
 
-    Bugünkü davranışı sabitler; D6 düzeltmesi bu testi bilinçli olarak değiştirir.
+    Bugünkü davranışı sabitler; D6, D4 (takvim günü) ve D5 (Kalan'dan bekleyen düşülmez)
+    düzeltmeleri bu testi bilinçli olarak değiştirir.
     """
     form = {"employee_id": "3", "start": "2026-12-01", "end": "2026-12-14", "reason": "Esit"}
     response = client.post("/new", data=form)
@@ -113,7 +115,9 @@ def test_d6_equal_to_remaining_is_silently_dropped(client: FlaskClient) -> None:
 
 
 def test_one_below_remaining_is_saved(client: FlaskClient) -> None:
-    """PB-11 — Kalan − 1 gün (Zeynep, 13 gün) kaydedilir."""
+    """PB-11 — Kalan − 1 gün (Zeynep, 13 gün) kaydedilir. Değerler D4 (takvim günü) ve D5'e
+    (Kalan'dan bekleyen düşülmez) bağlıdır; o düzeltmeler bu beklentiyi de bilinçli olarak
+    değiştirir (docs/domain.md)."""
     form = {"employee_id": "3", "start": "2026-12-01", "end": "2026-12-13", "reason": "Bir eksik"}
     assert_redirects_to_list(client.post("/new", data=form))
     rows = request_rows(client)
@@ -125,7 +129,8 @@ def test_d7_end_before_start_saved_with_negative_days(client: FlaskClient) -> No
     """PB-12 — bilinen sapma D7 (docs/domain.md): bitiş başlangıçtan önceyse talep negatif
     günle kaydedilir (BR-6: reddedilmeli).
 
-    Bugünkü davranışı sabitler; D7 düzeltmesi bu testi bilinçli olarak değiştirir.
+    Bugünkü davranışı sabitler; D7 ve D4 (gün sayımı) düzeltmeleri bu testi bilinçli olarak
+    değiştirir.
     """
     form = {"employee_id": "2", "start": "2026-11-10", "end": "2026-11-05", "reason": "Ters"}
     assert_redirects_to_list(client.post("/new", data=form))
