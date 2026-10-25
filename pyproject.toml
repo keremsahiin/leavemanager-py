@@ -1,0 +1,75 @@
+# Yalnızca araç ayarları. Proje paket olarak kurulmuyor; bağımlılıklar requirements*.txt'de
+# (docs/conventions.md, Language & framework versions).
+
+[tool.ruff]
+target-version = "py314"
+line-length = 100
+# Yalnızca Python: ruff varsayılan olarak Markdown'daki kod bloklarını da formatlar; docs/ ve
+# ANEW dosyalarındaki örnekler check'i kırmamalı.
+include = ["*.py", "*.pyi"]
+
+[tool.ruff.lint]
+# E/W/F: temel hatalar · I: import sırası · B: olası buglar · UP: güncel Python sözdizimi
+# S: güvenlik (bandit) · TID: yasaklı API (F6)
+select = ["E", "W", "F", "I", "B", "UP", "S", "TID"]
+
+[tool.ruff.lint.flake8-tidy-imports.banned-api]
+# F6 (docs/architecture.md): "bugün" yalnızca leavemanager/clock.py'den alınır.
+"datetime.datetime.now".msg = "F6: 'bugün' yalnızca leavemanager/clock.py'den alınır."
+"datetime.datetime.today".msg = "F6: 'bugün' yalnızca leavemanager/clock.py'den alınır."
+"datetime.datetime.utcnow".msg = "F6: 'bugün' yalnızca leavemanager/clock.py'den alınır."
+"datetime.date.today".msg = "F6: 'bugün' yalnızca leavemanager/clock.py'den alınır."
+
+[tool.ruff.lint.per-file-ignores]
+"leavemanager/clock.py" = ["TID251"]  # F6'nın tek istisnası
+"tests/**" = ["S101"]                 # pytest assert ile çalışır
+# GEÇİCİ: eski app.py yalnızca temel kurallara tabi; katmanlı pakete taşıyan refactor spec'i bu
+# satırı ve aşağıdaki format istisnasını kaldırır (bootstrap spec'siz kod değiştirmez).
+"app.py" = ["E501", "I", "B", "UP", "S", "TID"]
+
+[tool.ruff.format]
+exclude = ["app.py"]  # GEÇİCİ: yukarıdaki app.py notuna bakın
+
+# Katman kuralları F1–F5 (docs/architecture.md). leavemanager/ paketi henüz yok: lint-imports
+# adımı check.conf'a paketi oluşturan refactor spec'iyle eklenir.
+[tool.importlinter]
+root_package = "leavemanager"
+include_external_packages = true
+
+# Kural adları ASCII: lint-imports çıktısı Windows konsolunda Türkçe karakterleri bozuyor.
+[[tool.importlinter.contracts]]
+name = "F1-F4 layer direction: web -> services -> storage -> domain"
+type = "layers"
+layers = [
+    "leavemanager.web",
+    "leavemanager.services",
+    "leavemanager.storage",
+    "leavemanager.domain",
+]
+
+[[tool.importlinter.contracts]]
+name = "F1 domain knows no framework, database or clock"
+type = "forbidden"
+source_modules = ["leavemanager.domain"]
+forbidden_modules = ["flask", "werkzeug", "jinja2", "sqlite3", "leavemanager.clock"]
+
+[[tool.importlinter.contracts]]
+name = "F2 services know no HTTP"
+type = "forbidden"
+source_modules = ["leavemanager.services"]
+forbidden_modules = ["flask", "werkzeug", "jinja2"]
+
+# F3 ve F5 yalnızca doğrudan import'u yasaklar: web -> services -> storage zinciri meşrudur.
+[[tool.importlinter.contracts]]
+name = "F3 web reaches data only through services"
+type = "forbidden"
+source_modules = ["leavemanager.web"]
+forbidden_modules = ["leavemanager.storage"]
+allow_indirect_imports = true
+
+[[tool.importlinter.contracts]]
+name = "F5 database drivers only in storage"
+type = "forbidden"
+source_modules = ["leavemanager.domain", "leavemanager.services", "leavemanager.web"]
+forbidden_modules = ["sqlite3"]
+allow_indirect_imports = true

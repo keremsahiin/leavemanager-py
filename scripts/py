@@ -1,0 +1,12 @@
+#!/bin/sh
+# Projenin Python'unu çalıştırır: varsa .venv (Windows veya POSIX düzeni), yoksa PATH'teki python
+# (CI). check.conf adımları Python araçlarını bunun üzerinden çağırır, böylece venv'i
+# aktifleştirmeyi unutan bir oturumda check sebepsiz kırmızı olmaz.
+# PYTHONUTF8=1: Windows'ta da çıktı ve dosya kodlaması UTF-8 olur (Türkçe metin bozulmaz,
+# Windows ile CI aynı davranır).
+ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+export PYTHONUTF8=1
+for p in "$ROOT/.venv/Scripts/python.exe" "$ROOT/.venv/bin/python"; do
+  [ -x "$p" ] && exec "$p" "$@"
+done
+exec python "$@"

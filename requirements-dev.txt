@@ -1,0 +1,7 @@
+# Geliştirme ve doğrulama araçları (scripts/check.conf). Kurulum:
+#   python -m venv .venv && .venv/Scripts/python -m pip install -r requirements-dev.txt   (Windows)
+#   python -m venv .venv && .venv/bin/python -m pip install -r requirements-dev.txt       (Linux/macOS)
+-r requirements.txt
+pytest==9.1.1
+ruff==0.17.2
+import-linter==2.15
