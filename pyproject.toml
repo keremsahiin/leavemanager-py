@@ -30,6 +30,10 @@ select = ["E", "W", "F", "I", "B", "UP", "S", "TID"]
 [tool.ruff.format]
 exclude = ["app.py"]  # GEÇİCİ: yukarıdaki app.py notuna bakın
 
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]  # testler uygulamayı kökten import eder (tests/conftest.py)
+
 # Katman kuralları F1–F5 (docs/architecture.md). leavemanager/ paketi henüz yok: lint-imports
 # adımı check.conf'a paketi oluşturan refactor spec'iyle eklenir.
 [tool.importlinter]

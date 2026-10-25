@@ -5,3 +5,4 @@
 pytest==9.1.1
 ruff==0.17.2
 import-linter==2.15
+time-machine==3.5.1  # testlerde "bugün"ü dondurur (plan 0001, R2)
