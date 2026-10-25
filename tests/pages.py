@@ -16,9 +16,11 @@ _VOID = set("area base br col embed hr img input link meta source wbr".split()) 
 @dataclass
 class Page:
     rows: list[list[str]] = field(default_factory=list)  # <td> içeren her satırın hücre metinleri
+    headers: list[list[str]] = field(default_factory=list)  # <th> içeren her satırın başlıkları
     links: list[tuple[str, str]] = field(default_factory=list)  # (href, metin)
     options: list[tuple[str, str]] = field(default_factory=list)  # (value, metin)
     fields: list[str] = field(default_factory=list)  # form alanlarının name değerleri
+    labels: list[tuple[str, str]] = field(default_factory=list)  # (alanın önündeki metin, name)
     colored: list[tuple[str, str]] = field(default_factory=list)  # (metin, satır içi renk)
     text: str = ""  # görünen metin, boşluklar tekleştirilmiş
 
@@ -33,7 +35,9 @@ class _Parser(HTMLParser):
         self.page = Page()
         self._text: list[str] = []
         self._row: list[str] | None = None
+        self._head: list[str] = []
         self._cell: list[str] | None = None
+        self._last_text = ""  # son boş olmayan metin parçası: bir form alanının etiketi
         self._link: tuple[str, list[str]] | None = None
         self._option: tuple[str, list[str]] | None = None
         self._open: list[tuple[str, str | None]] = []  # açık etiketler ve satır içi renkleri
@@ -43,6 +47,7 @@ class _Parser(HTMLParser):
         attr = {k: v or "" for k, v in attrs}
         if tag in ("input", "select", "textarea") and attr.get("name"):
             self.page.fields.append(attr["name"])
+            self.page.labels.append((self._last_text, attr["name"]))
         if tag in _VOID:
             return
         match = _COLOR.search(attr.get("style", ""))
@@ -51,7 +56,8 @@ class _Parser(HTMLParser):
             self._in_style = True
         elif tag == "tr":
             self._row = []
-        elif tag == "td" and self._row is not None:
+            self._head = []
+        elif tag in ("td", "th") and self._row is not None:
             self._cell = []
         elif tag == "a":
             self._link = (attr.get("href", ""), [])
@@ -61,12 +67,14 @@ class _Parser(HTMLParser):
     def handle_endtag(self, tag: str) -> None:
         if tag == "style":
             self._in_style = False
-        elif tag == "td" and self._row is not None and self._cell is not None:
-            self._row.append(_squash(self._cell))
+        elif tag in ("td", "th") and self._row is not None and self._cell is not None:
+            (self._row if tag == "td" else self._head).append(_squash(self._cell))
             self._cell = None
         elif tag == "tr" and self._row is not None:
             if self._row:
                 self.page.rows.append(self._row)
+            if self._head:
+                self.page.headers.append(self._head)
             self._row = None
         elif tag == "a" and self._link is not None:
             self.page.links.append((self._link[0], _squash(self._link[1])))
@@ -83,6 +91,8 @@ class _Parser(HTMLParser):
         if self._in_style:
             return
         self._text.append(data)
+        if data.strip():
+            self._last_text = " ".join(data.split())
         for target in (self._cell, self._link and self._link[1], self._option and self._option[1]):
             if target is not None:
                 target.append(data)

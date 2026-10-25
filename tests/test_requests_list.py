@@ -23,7 +23,9 @@ def test_lists_seed_requests_in_order(client: FlaskClient) -> None:
     """PB-5."""
     response = client.get("/requests")
     assert response.status_code == 200
-    assert parse(response.text).rows == SEED_REQUESTS
+    page = parse(response.text)
+    assert page.headers == [["Personel", "Baslangic", "Bitis", "Gun", "Neden", "Durum"]]
+    assert page.rows == SEED_REQUESTS
 
 
 def test_d4_days_are_calendar_days(client: FlaskClient) -> None:

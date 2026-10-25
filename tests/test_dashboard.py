@@ -41,7 +41,9 @@ def test_balance_table_with_seed_data(client: FlaskClient) -> None:
     """PB-2."""
     response = client.get("/")
     assert response.status_code == 200
-    assert parse(response.text).rows == SEED_BALANCES
+    page = parse(response.text)
+    assert page.headers == [["Ad", "Birim", "Hak", "Kullanilan", "Kalan"]]
+    assert page.rows == SEED_BALANCES
 
 
 @pytest.mark.parametrize(

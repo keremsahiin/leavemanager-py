@@ -34,6 +34,12 @@ def test_form_offers_five_employees_and_fields(client: FlaskClient) -> None:
         ("5", "Elif Sahin"),
     ]
     assert page.fields == ["employee_id", "start", "end", "reason"]
+    assert page.labels == [
+        ("Personel:", "employee_id"),
+        ("Baslangic:", "start"),
+        ("Bitis:", "end"),
+        ("Neden:", "reason"),
+    ]
 
 
 def test_valid_request_is_pending_and_redirects(client: FlaskClient) -> None:
