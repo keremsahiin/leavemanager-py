@@ -15,14 +15,24 @@ ANEW kurallarıdır ve olduğu gibi geçerlidir.
   pytest fixture'ı başlatıp her durumda kapatır, yalnızca full profil.
 - Yerleşim: `tests/` altında `test_<konu>.py`; ortak fixture'lar `tests/conftest.py`'de. İş kuralı
   testinin adı kural numarasıyla başlar: `test_br4_pending_days_reduce_balance`.
-- Zaman: "bugün"ü kullanan her test sabit bir tarih enjekte eder (`clock` fixture'ı);
-  `datetime.now()` sonucuna bağlı test yazılmaz (`docs/architecture.md`, F6).
-- Durum: her test temiz bir uygulama ve seed verisiyle başlar (`create_app()` her testte yeniden);
-  bir testin yazdığı kayıt bir sonrakine ulaşmaz (Resource hygiene, kural 5).
-- **Check'e bağlanma:** bugün test yok ve pytest test bulamayınca 5 koduyla çıkar. Test adımını
-  ilk iş (karakterizasyon testleri ya da ilk bug düzeltmesi) `scripts/check.conf`'a ekler:
-  `test [fast]: sh scripts/py -m pytest -q -p no:cacheprovider`. "Test yok = yeşil" kabulü
-  yasak — test paketi kaybolursa check kırmızı olmalı.
+- Zaman: "bugün"ü kullanan her test sabit bir tarih kullanır; `datetime.now()` sonucuna bağlı
+  test yazılmaz (`docs/architecture.md`, F6). Tarih **`time-machine`** ile 12:00 UTC'de
+  dondurulur (`client_on(date)` fixture'ı): saat C seviyesinde durduğu için uygulamanın saati
+  nasıl okuduğundan bağımsızdır, UTC−11…UTC+11 aralığındaki her makinede aynı günü verir.
+- Durum: her test temiz bir uygulama ve seed verisiyle başlar; bir testin yazdığı kayıt bir
+  sonrakine ulaşmaz (Resource hygiene, kural 5).
+- **Fixture sözleşmesi (spec 0001):** testlerin uygulamaya bağlandığı tek yer
+  `tests/conftest.py`'dir. Her testte `app` modülünü yeniden yükler (`importlib.reload`) ve
+  `app.app.test_client()` kullanır. Bu yüzden `app.py` modül düzeyinde bir `app` (Flask)
+  nesnesi sunmayı ve **her yüklemede temiz seed verisiyle başlamayı** sürdürmelidir; katmanlı
+  pakete taşıyan refactor bu sözleşmeyi korunan davranış olarak alır.
+- Baseline (karakterizasyon) testleri yalnızca HTTP konuşur ve sayfaları içerikten okur
+  (`tests/pages.py`: tablo hücreleri, bağlantılar, form alanları, metnin rengi), etiket
+  yapısından değil. Bilinen bir sapmayı sabitleyen test `test_d<n>_` ile başlar; o sapmanın
+  düzeltmesi testi bilinçli olarak değiştirir (rapor + review ile — kural 5'in ihlali değildir).
+- **Check'e bağlanma:** `test [fast]: sh scripts/py -m pytest -q -p no:cacheprovider` (spec 0001
+  ile eklendi). "Test yok = yeşil" kabulü yasak — test paketi kaybolursa pytest 5 koduyla çıkar
+  ve check kırmızı olur.
 
 ## What must be tested
 - Her iş kuralı (BR-n, `docs/domain.md`) en az bir testle; sınır değerleri dahil (ör. BR-1 için
