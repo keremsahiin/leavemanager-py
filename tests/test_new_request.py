@@ -16,6 +16,11 @@ def request_rows(client: FlaskClient) -> list[list[str]]:
     return parse(client.get("/requests").text).rows
 
 
+def list_text(client: FlaskClient) -> str:
+    """Kullanıcının yönlendirildiği talep listesinin görünen metni."""
+    return parse(client.get("/requests").text).text
+
+
 def assert_redirects_to_list(response) -> None:
     assert response.status_code == 302
     assert response.headers["Location"] == "/requests"
@@ -105,12 +110,13 @@ def test_d6_equal_to_remaining_is_silently_dropped(client: FlaskClient) -> None:
     kayıt oluşmaz ve hata gösterilmez (BR-5: kabul edilmeli).
 
     Bugünkü davranışı sabitler; D6, D4 (takvim günü) ve D5 (Kalan'dan bekleyen düşülmez)
-    düzeltmeleri bu testi bilinçli olarak değiştirir.
+    düzeltmeleri bu testi bilinçli olarak değiştirir. "Hata gösterilmez": yönlendirilen liste
+    sayfası POST'tan önceki haliyle aynıdır — ne yeni kayıt ne mesaj (VERIFY G1).
     """
+    before = list_text(client)
     form = {"employee_id": "3", "start": "2026-12-01", "end": "2026-12-14", "reason": "Esit"}
-    response = client.post("/new", data=form)
-    assert_redirects_to_list(response)
-    assert "HATA" not in response.text
+    assert_redirects_to_list(client.post("/new", data=form))
+    assert list_text(client) == before
     assert len(request_rows(client)) == SEED_REQUEST_COUNT
 
 
@@ -159,10 +165,12 @@ def test_d7_invalid_input_silently_redirects(client: FlaskClient, form: dict[str
     """PB-13 — bilinen sapma D7 (docs/domain.md): geçersiz girdi kayıt oluşturmaz ama hata da
     göstermez; kullanıcı talep listesine yönlendirilir (BR-6: hata gösterilmeli).
 
-    Bugünkü davranışı sabitler; D7 düzeltmesi bu testi bilinçli olarak değiştirir.
+    Bugünkü davranışı sabitler; D7 düzeltmesi bu testi bilinçli olarak değiştirir. "Hata
+    göstermez": yönlendirilen liste sayfası POST'tan önceki haliyle aynıdır (VERIFY G1).
     """
-    response = client.post("/new", data=form)
-    assert_redirects_to_list(response)
+    before = list_text(client)
+    assert_redirects_to_list(client.post("/new", data=form))
+    assert list_text(client) == before
     assert len(request_rows(client)) == SEED_REQUEST_COUNT
 
 
