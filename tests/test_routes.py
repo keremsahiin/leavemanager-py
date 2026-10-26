@@ -18,12 +18,20 @@ NAVIGATION = {("/", "Ana Sayfa"), ("/requests", "Talepler"), ("/new", "Yeni Tale
         ("GET", "/requests/", 404),
         ("POST", "/requests", 405),
         ("PUT", "/new", 405),
+        ("POST", "/", 405),
+        ("PUT", "/requests", 405),
+        ("DELETE", "/requests", 405),
+        ("DELETE", "/new", 405),
     ],
 )
 def test_only_known_routes_respond(
     client: FlaskClient, method: str, path: str, status: int
 ) -> None:
-    """PB-15 — yalnızca `/`, `/requests` (GET) ve `/new` (GET, POST) sunulur."""
+    """PB-15 — yalnızca `/`, `/requests` (GET) ve `/new` (GET, POST) sunulur.
+
+    "Bilinmeyen adres" kısmı HTTP üzerinden ancak örneklenebilir; adres listesini saymak iç
+    yapıya bağlanmak olur (spec Constraints). Bilinen sınır (VERIFY G2).
+    """
     assert client.open(path, method=method).status_code == status
 
 
