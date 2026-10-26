@@ -118,7 +118,7 @@ def test_d5_pending_days_not_deducted(client: FlaskClient) -> None:
 def test_d14_remaining_can_go_negative(client_on: Callable[[date], FlaskClient]) -> None:
     """PB-4 — bilinen sapma D14 (docs/domain.md): Kalan negatife düşebilir (I-1 ihlali).
 
-    Bugünkü davranışı sabitler; D14, D4 (Kullanılan takvim günü) ve D5 (bekleyen düşülmez)
-    düzeltmeleri bu testi bilinçli olarak değiştirir.
+    Bugünkü davranışı sabitler; D14, D11 (gelecekteki onaylı talep sayılır), D4 (Kullanılan
+    takvim günü) ve D5 (bekleyen düşülmez) düzeltmeleri bu testi bilinçli olarak değiştirir.
     """
     assert balances(client_on(date(2008, 12, 31)))[AYSE] == (0, 12, -12)
