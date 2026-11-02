@@ -97,7 +97,7 @@ def test_d9_insufficient_balance_shows_internal_error_text(
     dahili telefon numarası içerir.
 
     Bugünkü davranışı sabitler; D9 düzeltmesi bu testi bilinçli olarak değiştirir. Zeynep
-    durumu ayrıca D5'e bağlıdır (Kalan'dan bekleyen 1 gün düşülmez).
+    örneği D5 düzeltmesinden etkilenmez (Kalan 13 olur, 15 iş günü yine fazla).
     """
     form = {"employee_id": employee_id, "start": start, "end": end, "reason": "x"}
     response = client.post("/new", data=form)
