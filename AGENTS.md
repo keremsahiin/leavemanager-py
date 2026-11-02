@@ -1,7 +1,7 @@
 # AGENTS.md — Project Rules
 
 **LeaveManager** — şirket içi personel yıllık izin takibi (Flask 3.1, Python 3.14, `.venv`). Canlıda
-değil; tek dosyalı eski kod (`app.py`) katmanlı yapıya taşınacak. Bilinen sapmalar D1–D13: `docs/domain.md`.
+değil; tek dosyalı eski kod (`app.py`) katmanlı yapıya taşınacak. Bilinen sapmalar D1–D14: `docs/domain.md`.
 
 ## Operating mode
 

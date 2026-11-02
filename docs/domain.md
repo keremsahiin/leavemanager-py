@@ -75,6 +75,7 @@ düzelten işin spec'ine / raporuna referansla buradan silinir.
 | D11 | `get_used_days` | Kullanılan izin tüm yıllardan toplanıyor, hak yıllık; izin yılı kavramı yok. | BR-4 |
 | D12 | `/requests`, `/new` | Neden alanı herkese görünüyor, uyarı yok. | BR-9 |
 | D13 | `seed`, `get_used_days`, `status_badge`, `/` | Durum kayıtta Türkçe string (`"Onaylandi"` …) ve string literal ile karşılaştırılıyor (bir yerde `status.lower()`). Kural: kayıtta `pending`/`approved`/`rejected`, `LeaveStatus` enum'u. | `docs/conventions.md` Naming |
+| D14 | `get_remaining` | Kalan = Hak − Kullanılan, alt sınır yok: Kalan negatife düşebiliyor (ör. kıdem 0 iken onaylı talep varsa). Spec 0001 / plan 0001 R6'da bulundu. | I-1 |
 
 ## Open decisions
 - Kanun atıflarının (BR-1, BR-3, BR-4) İK / hukuk tarafından teyidi.
