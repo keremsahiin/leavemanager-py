@@ -25,7 +25,8 @@ def completed_years(hire_date: date, today: date) -> int:
 def working_days(start: date, end: date) -> int:
     """BR-3 — izin günü: başlangıç ve bitiş dahil aralıktaki Pazartesi–Cuma günleri.
 
-    Resmî tatiller henüz sayılmaz (takvim kaynağı açık karar). Bitiş başlangıçtan önceyse 0.
+    Resmî tatiller henüz düşülmez: hafta içine denk gelen tatil izin günü sayılır (D15; takvim
+    kaynağı açık karar). Bitiş başlangıçtan önceyse 0.
     """
     days = (end - start).days + 1
     if days <= 0:

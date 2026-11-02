@@ -35,8 +35,8 @@ mimariye uymaması ayrıca kayıtlıdır: refactor spec'ine kadar beklenen durum
   yılı, artık olmayan yıllarda 28 Şubat'ta dolar. — Kod: **uyuyor** (spec 0002).
 - **BR-3 — İzin günü.** Başlangıç ve bitiş dahil aralıktaki Pazartesi–Cuma günleri sayılır;
   hafta sonu, ulusal bayram ve genel tatil günleri sayılmaz (md. 56). Cumartesi iş günü değildir.
-  — Kod: hafta sonu **uyuyor** (spec 0002); resmî tatiller henüz sayılmıyor — takvimin kaynağı
-  açık karar.
+  — Kod: hafta sonu kısmı **uyuyor** (spec 0002); resmî tatil kısmı **sapıyor** (D15). Takvimin
+  kaynağı açık karar.
 - **BR-4 — Bakiye.** Bakiye = kazanılmış hakların toplamı − onaylanan izin günleri − bekleyen
   izin günleri. Her tamamlanan hizmet yılının yıldönümünde o yılın BR-1 hakkı eklenir.
   Kullanılmayan izin yanmaz, devir tavanı yoktur (md. 53: hakkından vazgeçilemez). Reddedilen
@@ -76,6 +76,7 @@ Kapananlar: **D3, D4** — spec 0002 (kıdem yıldönümü ve iş günü sayım�
 | D12 | `/requests`, `/new` | Neden alanı herkese görünüyor, uyarı yok. | BR-9 |
 | D13 | `seed`, `get_used_days`, `status_badge`, `/` | Durum kayıtta Türkçe string (`"Onaylandi"` …) ve string literal ile karşılaştırılıyor (bir yerde `status.lower()`). Kural: kayıtta `pending`/`approved`/`rejected`, `LeaveStatus` enum'u. | `docs/conventions.md` Naming |
 | D14 | `get_remaining` | Kalan = Hak − Kullanılan, alt sınır yok: Kalan negatife düşebiliyor (ör. kıdem 0 iken onaylı talep varsa). Spec 0001 / plan 0001 R6'da bulundu. | I-1 |
+| D15 | `working_days` (`leavemanager/domain/leave_rules.py`) | Hafta içine denk gelen resmî tatil ve bayram günleri izin günü sayılıyor (ör. 2026-10-29 Perşembe, Cumhuriyet Bayramı: 1 gün). Takvimin kaynağı açık karar. Spec 0002 review'unda (R1-2) bulundu. | BR-3 |
 
 ## Open decisions
 - Kanun atıflarının (BR-1, BR-3, BR-4) İK / hukuk tarafından teyidi.
