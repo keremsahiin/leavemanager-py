@@ -34,8 +34,8 @@ exclude = ["app.py"]  # GEÇİCİ: yukarıdaki app.py notuna bakın
 testpaths = ["tests"]
 pythonpath = ["."]  # testler uygulamayı kökten import eder (tests/conftest.py)
 
-# Katman kuralları F1–F5 (docs/architecture.md). leavemanager/ paketi henüz yok: lint-imports
-# adımı check.conf'a paketi oluşturan refactor spec'iyle eklenir.
+# Katman kuralları F1–F5 (docs/architecture.md). leavemanager/ paketi spec 0002 ile başladı;
+# lint-imports adımı check.conf'a taşımayı tamamlayan refactor spec'iyle eklenir.
 [tool.importlinter]
 root_package = "leavemanager"
 include_external_packages = true
