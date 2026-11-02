@@ -32,10 +32,11 @@ mimariye uymaması ayrıca kayıtlıdır: refactor spec'ine kadar beklenen durum
 - **BR-1 — Yıllık izin hakkı.** Kıdem 1 yıldan az: 0 gün · 1–5 yıl (5 dahil): 14 gün · 6–14 yıl:
   20 gün · 15 yıl ve üzeri: 26 gün (İş K. md. 53). — Kod: **sapıyor** (D2; D1 yalnızca yorum).
 - **BR-2 — Kıdem.** İşe giriş yıldönümünde tamamlanan tam yıl sayılır. 29 Şubat'ta işe girenin
-  yılı, artık olmayan yıllarda 28 Şubat'ta dolar. — Kod: **sapıyor** (D3).
+  yılı, artık olmayan yıllarda 28 Şubat'ta dolar. — Kod: **uyuyor** (spec 0002).
 - **BR-3 — İzin günü.** Başlangıç ve bitiş dahil aralıktaki Pazartesi–Cuma günleri sayılır;
   hafta sonu, ulusal bayram ve genel tatil günleri sayılmaz (md. 56). Cumartesi iş günü değildir.
-  — Kod: **sapıyor** (D4). Resmî tatil takviminin kaynağı açık karar.
+  — Kod: hafta sonu **uyuyor** (spec 0002); resmî tatiller henüz sayılmıyor — takvimin kaynağı
+  açık karar.
 - **BR-4 — Bakiye.** Bakiye = kazanılmış hakların toplamı − onaylanan izin günleri − bekleyen
   izin günleri. Her tamamlanan hizmet yılının yıldönümünde o yılın BR-1 hakkı eklenir.
   Kullanılmayan izin yanmaz, devir tavanı yoktur (md. 53: hakkından vazgeçilemez). Reddedilen
@@ -59,16 +60,15 @@ mimariye uymaması ayrıca kayıtlıdır: refactor spec'ine kadar beklenen durum
 ## Known deviations
 Bootstrap incelemesinde (2026-10-25) bulunan, koddaki bilinen sapmalar. Kapanan sapma, onu
 düzelten işin spec'ine / raporuna referansla buradan silinir.
+Kapananlar: **D3, D4** — spec 0002 (kıdem yıldönümü ve iş günü sayımı).
 
 | # | Yer (`app.py`) | Gözlem | Kural |
 |---|---|---|---|
 | D1 | `get_entitlement` | Yorum "1–5 yıl 15 gün" diyor, kod 14 döndürüyor (kod doğru, yorum yanlış). | BR-1 |
 | D2 | `get_entitlement` | Tam 15 yıl kıdeme 20 gün veriyor; kural 26. | BR-1 |
-| D3 | `get_seniority_years` | Kıdem yalnızca takvim yılı farkı (31.12.2025 girişli kişi 01.01.2026'da 1 yıllık). | BR-2 |
-| D4 | `calc_days` | Yorum "iş günü" diyor, kod takvim günü sayıyor. | BR-3 |
 | D5 | `get_remaining` | Bekleyen talepler bakiyeden düşülmüyor. | BR-4 |
 | D6 | `create_request` ↔ `/new` | Route `< days`, servis `<= days` kontrol ediyor; eşitlikte talep sessizce kaydedilmiyor. | BR-5 |
-| D7 | `create_request`, `/new` | Olmayan personel ve her istisna "başarılı" sayılıyor; bitiş < başlangıç kontrolü yok (negatif gün). | BR-6 |
+| D7 | `create_request`, `/new` | Olmayan personel ve her istisna "başarılı" sayılıyor; bitiş < başlangıç kontrolü yok; böyle bir talep ve yalnızca hafta sonunu kapsayan talep 0 günle kaydediliyor. | BR-6 |
 | D8 | `create_request` | Geçmiş tarihli talep herkese açık. | BR-7 |
 | D9 | genel | Güvenlik açıkları: kimlik doğrulama yok, stored XSS (`body\|safe`), CSRF yok, `debug=True`, hata mesajında dahili kod ve telefon. Ayrıntı: `docs/security.md`. | — |
 | D10 | `recalculate_year_end` | Devir hesabı yorum satırında; 5 gün tavanı BR-4'e aykırı. | BR-4 |
