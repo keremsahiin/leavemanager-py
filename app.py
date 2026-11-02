@@ -4,6 +4,7 @@
 # NOT: Bu dosyaya dokunmadan once Ahmet'e sor. (Ahmet 2019'da ayrildi)
 from flask import Flask, request, redirect, render_template_string
 from datetime import datetime, date
+from leavemanager.domain.leave_rules import completed_years
 
 app = Flask(__name__)
 
@@ -55,9 +56,8 @@ class LeaveService:
         return 26
 
     def get_seniority_years(self, emp):
-        # yil farki yeterli, ay/gun onemli degil dedi IK (2015)
         today = datetime.now().date()
-        return today.year - emp["hire_date"].year
+        return completed_years(emp["hire_date"], today)
 
     # def recalculate_year_end(self):
     #     # yil sonunda devreden izinleri yeniden hesapla
