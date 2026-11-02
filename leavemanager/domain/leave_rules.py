@@ -1,7 +1,7 @@
 """İzin kuralları (docs/domain.md). Saf fonksiyonlar: "bugün" parametre olarak gelir (F1, F6)."""
 
 import calendar
-from datetime import date, timedelta
+from datetime import date
 
 
 def _anniversary(hire_date: date, year: int) -> date:
@@ -28,4 +28,9 @@ def working_days(start: date, end: date) -> int:
     Resmî tatiller henüz sayılmaz (takvim kaynağı açık karar). Bitiş başlangıçtan önceyse 0.
     """
     days = (end - start).days + 1
-    return sum(1 for offset in range(days) if (start + timedelta(days=offset)).weekday() < 5)
+    if days <= 0:
+        return 0
+    # Aralığın uzunluğundan bağımsız sabit süre: her tam hafta 5 gün, artan en fazla 6 gün tek tek.
+    weeks, rest = divmod(days, 7)
+    first = start.weekday()
+    return weeks * 5 + sum(1 for offset in range(rest) if (first + offset) % 7 < 5)
