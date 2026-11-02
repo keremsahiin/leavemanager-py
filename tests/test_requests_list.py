@@ -1,4 +1,4 @@
-"""Talep listesi (`/requests`) karakterizasyonu — spec 0001, PB-5…PB-7.
+"""Talep listesi (`/requests`) — spec 0001 PB-5…PB-7; spec 0002 CB-2 (iş günü).
 
 `test_d<n>_` ile başlayan testler bilinen bir sapmanın BUGÜNKÜ davranışını sabitler
 (docs/domain.md, Known deviations). O sapmanın düzeltmesi testi bilinçli olarak değiştirir.
@@ -8,20 +8,20 @@ from flask.testing import FlaskClient
 from pages import parse
 
 SEED_REQUESTS = [  # Personel, Başlangıç, Bitiş, Gün, Neden, Durum — kayıt sırası
-    ["Ayse Yilmaz", "2026-07-06", "2026-07-17", "12", "Yaz tatili", "Onaylandi"],
+    ["Ayse Yilmaz", "2026-07-06", "2026-07-17", "10", "Yaz tatili", "Onaylandi"],
     ["Mehmet Demir", "2026-11-02", "2026-11-04", "3", "Aile ziyareti", "Beklemede"],
     ["Zeynep Kaya", "2026-11-09", "2026-11-09", "1", "Saglik", "Beklemede"],
     ["Ahmet Celik", "2026-12-21", "2026-12-25", "5", "Yilbasi oncesi", "Beklemede"],
     ["Ayse Yilmaz", "2026-12-28", "2026-12-30", "3", "Yil sonu", "Beklemede"],
     ["Elif Sahin", "2026-10-05", "2026-10-07", "3", "Tasinma", "Reddedildi"],
-    ["Zeynep Kaya", "2026-09-14", "2026-09-25", "12", "Uzun tatil", "Reddedildi"],
+    ["Zeynep Kaya", "2026-09-14", "2026-09-25", "10", "Uzun tatil", "Reddedildi"],
     ["Mehmet Demir", "2026-08-03", "2026-08-03", "1", "Ozel is", "Reddedildi"],
 ]
 
 
 def test_lists_seed_requests_in_order(client: FlaskClient) -> None:
-    """PB-5. Değerler D4 (Gün takvim günü) ve D13'e (durum kayıttaki metniyle) bağlıdır;
-    o düzeltmeler bu beklentiyi de bilinçli olarak değiştirir (docs/domain.md)."""
+    """PB-5; spec 0002 CB-2 (Gün iş günü). Değerler D13'e (durum kayıttaki metniyle) bağlıdır;
+    o düzeltme bu beklentiyi de bilinçli olarak değiştirir (docs/domain.md)."""
     response = client.get("/requests")
     assert response.status_code == 200
     page = parse(response.text)
@@ -29,16 +29,14 @@ def test_lists_seed_requests_in_order(client: FlaskClient) -> None:
     assert page.rows == SEED_REQUESTS
 
 
-def test_d4_days_are_calendar_days(client: FlaskClient) -> None:
-    """PB-5 — bilinen sapma D4 (docs/domain.md): Gün takvim günüdür; Cuma 2026-11-13 →
-    Pazartesi 2026-11-16 talebi 4 gün (BR-3: 2 iş günü).
-
-    Bugünkü davranışı sabitler; D4 düzeltmesi bu testi bilinçli olarak değiştirir.
-    """
+def test_br3_counts_weekdays_only(client: FlaskClient) -> None:
+    """BR-3, spec 0002 CB-2 — izin günü, başlangıç ve bitiş dahil Pazartesi–Cuma günleridir:
+    Cuma 2026-11-13 → Pazartesi 2026-11-16 talebi 2 gün. Yalnızca hafta sonu = 0 örneği D7'ye
+    bağlı olduğu için `test_new_request.py::test_d7_weekend_only_…`'de (plan 0002, A2)."""
     form = {"employee_id": "2", "start": "2026-11-13", "end": "2026-11-16", "reason": "Hafta sonu"}
     client.post("/new", data=form)
     last = parse(client.get("/requests").text).rows[-1]
-    assert last[:4] == ["Mehmet Demir", "2026-11-13", "2026-11-16", "4"]
+    assert last[:4] == ["Mehmet Demir", "2026-11-13", "2026-11-16", "2"]
 
 
 def test_d13_status_text_and_color(client: FlaskClient) -> None:

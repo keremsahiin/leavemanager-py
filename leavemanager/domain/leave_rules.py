@@ -1,7 +1,7 @@
 """İzin kuralları (docs/domain.md). Saf fonksiyonlar: "bugün" parametre olarak gelir (F1, F6)."""
 
 import calendar
-from datetime import date
+from datetime import date, timedelta
 
 
 def _anniversary(hire_date: date, year: int) -> date:
@@ -20,3 +20,12 @@ def completed_years(hire_date: date, today: date) -> int:
     if today < _anniversary(hire_date, today.year):
         years -= 1
     return max(years, 0)
+
+
+def working_days(start: date, end: date) -> int:
+    """BR-3 — izin günü: başlangıç ve bitiş dahil aralıktaki Pazartesi–Cuma günleri.
+
+    Resmî tatiller henüz sayılmaz (takvim kaynağı açık karar). Bitiş başlangıçtan önceyse 0.
+    """
+    days = (end - start).days + 1
+    return sum(1 for offset in range(days) if (start + timedelta(days=offset)).weekday() < 5)
