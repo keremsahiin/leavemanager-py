@@ -35,8 +35,13 @@ Uzak depo: **GitHub**. Varsayılan branch: `main`.
 ## Pull requests
 - PR template checklist completed; `scripts/check` green in CI; squash-merge.
 - Ekip tek kişi: GitHub'da zorunlu insan onayı **0** (kendi PR'ınızı onaylayamazsınız).
-  Bağımsız review her PR'da reviewer alt ajanıyla yapılır; ikinci bir kişi katılırsa zorunlu
-  onay 1'e çıkar.
+  Bağımsız review her PR'da reviewer alt ajanıyla yapılır; ikinci bir kişi katılırsa ve koruma
+  açıksa zorunlu onay 1'e çıkar.
 - **Branch koruması (`main`)**: PR zorunlu; `doctor` ve `check` job'ları zorunlu durum kontrolü
-  (`audit` bilgilendirici); force push ve silme kapalı. GitHub ayarından elle yapılır — uzak depo
-  oluşturulduğunda.
+  (`audit` bilgilendirici); force push ve silme kapalı. GitHub ayarından elle yapılır.
+  **Şu an uygulanmıyor (2026-11-04):** depo özel; GitHub korumayı açmak için Pro'ya geçmeyi ya da
+  depoyu herkese açmayı istiyor (HTTP 403). Bu kuralları şimdilik yalnızca çalışma disiplini tutar.
+  CI'daki `doctor` / `check` her push ve PR'da çalışır ama yalnızca sonucu bildirir: kırmızı
+  sonuç merge'ü, doğrudan push'u, force push'u ya da silmeyi engellemez. Hesap Pro'ya geçerse ya
+  da depo herkese açılırsa koruma elle açılır. O zamana kadar `workflows/segments.md` ve PR
+  şablonundaki "CI enforces / gates hold" ifadeleri "CI bildirir" diye okunur.
