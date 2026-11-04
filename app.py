@@ -4,6 +4,7 @@
 # NOT: Bu dosyaya dokunmadan once Ahmet'e sor. (Ahmet 2019'da ayrildi)
 from flask import Flask, request, redirect, render_template_string
 from datetime import datetime, date
+from html import escape
 from leavemanager.domain.leave_rules import annual_entitlement, completed_years, leave_balance, working_days
 
 app = Flask(__name__)
@@ -137,7 +138,7 @@ def list_requests():
     for r in Db.requests:
         emp = [e for e in Db.employees if e["id"] == r["employee_id"]][0]
         body += "<tr><td>%s</td><td>%s</td><td>%s</td><td>%d</td><td>%s</td><td>%s</td></tr>" % (
-            emp["name"], r["start"], r["end"], svc.calc_days(r["start"], r["end"]), r["reason"], svc.status_badge(r["status"]))
+            emp["name"], r["start"], r["end"], svc.calc_days(r["start"], r["end"]), escape(r["reason"]), svc.status_badge(r["status"]))
     body += "</table>"
     return render_template_string(PAGE, body=body)
 
