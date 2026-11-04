@@ -38,5 +38,7 @@ Uzak depo: **GitHub**. Varsayılan branch: `main`.
   Bağımsız review her PR'da reviewer alt ajanıyla yapılır; ikinci bir kişi katılırsa zorunlu
   onay 1'e çıkar.
 - **Branch koruması (`main`)**: PR zorunlu; `doctor` ve `check` job'ları zorunlu durum kontrolü
-  (`audit` bilgilendirici); force push ve silme kapalı. GitHub ayarından elle yapılır — uzak depo
-  oluşturulduğunda.
+  (`audit` bilgilendirici); force push ve silme kapalı. GitHub ayarından elle yapılır.
+  **Şu an uygulanmıyor (2026-11-04):** depo özel, hesap GitHub Free; GitHub bu planda korumayı
+  açmıyor (HTTP 403). Bu kurallar şimdilik çalışma disiplini ve CI'daki `doctor` / `check` ile
+  korunur. Hesap Pro'ya geçerse ya da depo herkese açılırsa koruma açılır.
