@@ -4,7 +4,7 @@
 # NOT: Bu dosyaya dokunmadan once Ahmet'e sor. (Ahmet 2019'da ayrildi)
 from flask import Flask, request, redirect, render_template_string
 from datetime import datetime, date
-from leavemanager.domain.leave_rules import completed_years, working_days
+from leavemanager.domain.leave_rules import annual_entitlement, completed_years, leave_balance, working_days
 
 app = Flask(__name__)
 
@@ -46,41 +46,30 @@ class LeaveService:
     # Kidem -> hak edilen izin. 1-5 yil arasi 15 gun.
     # (tablo IK el kitabindan, 2014 baskisi)
     def get_entitlement(self, emp):
-        years = self.get_seniority_years(emp)
-        if years < 1:
-            return 0
-        if years <= 5:
-            return 14
-        if years <= 15:
-            return 20
-        return 26
+        return annual_entitlement(self.get_seniority_years(emp))
 
     def get_seniority_years(self, emp):
         today = datetime.now().date()
         return completed_years(emp["hire_date"], today)
 
-    # def recalculate_year_end(self):
-    #     # yil sonunda devreden izinleri yeniden hesapla
-    #     # for e in Db.employees:
-    #     #     carry = self.get_remaining(e)
-    #     #     if carry > 5: carry = 5
-    #     #     e["carry"] = carry
-    #     # SILME - belki lazim olur (Ahmet) - 2017
-    #     pass
-
-    def get_used_days(self, emp_id):
-        total = 0
-        for r in Db.requests:
-            if r["employee_id"] == emp_id and r["status"] == "Onaylandi":
-                total += self.calc_days(r["start"], r["end"])
-        return total
-
     def calc_days(self, start, end):
         return working_days(start, end)
 
+    def get_balance(self, emp):
+        today = datetime.now().date()
+        approved = []
+        pending = 0
+        for r in Db.requests:
+            if r["employee_id"] == emp["id"]:
+                days = self.calc_days(r["start"], r["end"])
+                if r["status"] == "Onaylandi":
+                    approved.append((r["start"], days))
+                if r["status"] == "Beklemede":
+                    pending += days
+        return leave_balance(emp["hire_date"], today, approved, pending)
+
     def get_remaining(self, emp):
-        # bekleyenler de dusulecek mi? simdilik hayir (2018'de konusuldu, karar yok)
-        return self.get_entitlement(emp) - self.get_used_days(emp["id"])
+        return self.get_balance(emp).remaining
 
     def create_request(self, emp_id, start, end, reason):
         try:
@@ -134,10 +123,11 @@ def dashboard():
     onaylanan = len([r for r in Db.requests if r["status"] == "Onaylandi"])
     reddedilen = len([r for r in Db.requests if r["status"] == "Reddedildi"])
     body = "<div class='kutu'>Bekleyen: <b>%d</b></div><div class='kutu'>Onaylanan: <b>%d</b></div><div class='kutu'>Reddedilen: <b>%d</b></div>" % (bekleyen, onaylanan, reddedilen)
-    body += "<h3>Personel Bakiyeleri</h3><table><tr><th>Ad</th><th>Birim</th><th>Hak</th><th>Kullanilan</th><th>Kalan</th></tr>"
+    body += "<h3>Personel Bakiyeleri</h3><table><tr><th>Ad</th><th>Birim</th><th>Hak</th><th>Devir</th><th>Kullanilan</th><th>Bekleyen</th><th>Kalan</th></tr>"
     for e in Db.employees:
-        body += "<tr><td>%s</td><td>%s</td><td>%d</td><td>%d</td><td>%d</td></tr>" % (
-            e["name"], e["department"], svc.get_entitlement(e), svc.get_used_days(e["id"]), svc.get_remaining(e))
+        balance = svc.get_balance(e)
+        body += "<tr><td>%s</td><td>%s</td><td>%d</td><td>%d</td><td>%d</td><td>%d</td><td>%d</td></tr>" % (
+            e["name"], e["department"], svc.get_entitlement(e), balance.carried_over, balance.used, balance.pending, balance.remaining)
     body += "</table>"
     return render_template_string(PAGE, body=body)
 

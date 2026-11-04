@@ -13,7 +13,7 @@ refactor spec'iyle yapılır: önce karakterizasyon testleri, sonra taşıma (`w
 Bu spec `leavemanager/` paketini, `clock.py`'yi ve `create_app()`'i oluşturur, `lint-imports`
 adımını check'e ekler ve `pyproject.toml`'daki geçici `app.py` istisnasını kaldırır.
 O spec'e kadar `app.py` aşağıdaki kurallara uymaz; yeni kod uyar. İlk domain modülü
-`leavemanager/domain/leave_rules.py` (kıdem, izin günü) spec 0002 ile geldi; `app.py` onu çağırır.
+`leavemanager/domain/leave_rules.py` (kıdem, izin günü, bakiye) spec 0002 ile geldi; `app.py` onu çağırır.
 
 ## Modules / components and ownership
 

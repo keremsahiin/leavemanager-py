@@ -15,7 +15,9 @@ görüşmesinde kabul edildi; **İK / hukuk teyidi henüz yapılmadı** (bkz. Op
 | İzin talebi (`request`) | Bir tarih aralığı için izin isteği; başlangıç ve bitiş **dahil**. | Onaylanana kadar "izin" değildir. |
 | Talep durumu (`LeaveStatus`) | `pending` (Beklemede), `approved` (Onaylandı), `rejected` (Reddedildi). | Kayıtta İngilizce kod, ekranda Türkçe etiket (`docs/conventions.md`). |
 | İzin günü | Bir talepte bakiyeden düşülen gün sayısı (BR-3). | Takvim günü değildir. |
-| Kullanılan izin (used) | Onaylanmış taleplerdeki izin günlerinin toplamı. | |
+| Kullanılan izin (used) | Onaylanmış taleplerdeki izin günlerinin toplamı. | Ana sayfada bu izin yılından itibaren başlayanlar; öncekiler Devir'den düşülür. |
+| İzin yılı (leave year) | Son yıldönümünde başlayan bir yıllık dönem; kıdem 0 iken işe giriş gününde başlar. | Takvim yılı değildir. |
+| Devir (carried over) | Önceki izin yıllarından kullanılmadan kalan gün (BR-4). | Yanmaz, tavanı yoktur. |
 | Kalan izin / bakiye (remaining) | BR-4'e göre hesaplanan, talep edilebilir gün. | |
 | Neden (`reason`) | Talebe eklenen isteğe bağlı serbest metin not (BR-9). | Kişisel veri; sağlık bilgisi yazılmaz. |
 | Çalışan (rol) | Kendi taleplerini girer ve görür. | |
@@ -40,7 +42,7 @@ mimariye uymaması ayrıca kayıtlıdır: refactor spec'ine kadar beklenen durum
 - **BR-4 — Bakiye.** Bakiye = kazanılmış hakların toplamı − onaylanan izin günleri − bekleyen
   izin günleri. Her tamamlanan hizmet yılının yıldönümünde o yılın BR-1 hakkı eklenir.
   Kullanılmayan izin yanmaz, devir tavanı yoktur (md. 53: hakkından vazgeçilemez). Reddedilen
-  talep bakiyeyi etkilemez. — Kod: **sapıyor** (D5, D10, D11).
+  talep bakiyeyi etkilemez. — Kod: **uyuyor** (spec 0003).
 - **BR-5 — Bakiye kontrolü.** Talebin izin günü kalan bakiyeye eşit veya azsa talep kabul edilir.
   Kontrol yalnızca servis katmanında yapılır. — Kod: **sapıyor** (D6).
 - **BR-6 — Geçerlilik.** Bitiş başlangıçtan önce olamaz; izin günü en az 1 olmalı; personel
@@ -60,30 +62,30 @@ mimariye uymaması ayrıca kayıtlıdır: refactor spec'ine kadar beklenen durum
 ## Known deviations
 Bootstrap incelemesinde (2026-10-25) bulunan, koddaki bilinen sapmalar. Kapanan sapma, onu
 düzelten işin spec'ine / raporuna referansla buradan silinir.
-Kapananlar: **D3, D4** — spec 0002 (kıdem yıldönümü ve iş günü sayımı).
+Kapananlar: **D3, D4** — spec 0002 (kıdem yıldönümü ve iş günü sayımı) · **D5, D10, D11** —
+spec 0003 (bekleyen düşümü, izin yılı ve devir).
 
-| # | Yer (`app.py`) | Gözlem | Kural |
+| # | Yer (aksi yazılmadıkça `app.py`) | Gözlem | Kural |
 |---|---|---|---|
-| D1 | `get_entitlement` | Yorum "1–5 yıl 15 gün" diyor, kod 14 döndürüyor (kod doğru, yorum yanlış). | BR-1 |
-| D2 | `get_entitlement` | Tam 15 yıl kıdeme 20 gün veriyor; kural 26. | BR-1 |
-| D5 | `get_remaining` | Bekleyen talepler bakiyeden düşülmüyor. | BR-4 |
+| D1 | `get_entitlement` (yorum), `annual_entitlement` (`leavemanager/domain/leave_rules.py`) | Yorum "1–5 yıl 15 gün" diyor, kod 14 döndürüyor (kod doğru, yorum yanlış). | BR-1 |
+| D2 | `annual_entitlement` (`leavemanager/domain/leave_rules.py`) | Tam 15 yıl kıdeme 20 gün veriyor; kural 26. Birikime de girer: 15. yılı geçen personelin Devir'i kalıcı olarak 6 gün eksik (Ayşe 322, doğrusu 328). | BR-1 |
 | D6 | `create_request` ↔ `/new` | Route `< days`, servis `<= days` kontrol ediyor; eşitlikte talep sessizce kaydedilmiyor. | BR-5 |
 | D7 | `create_request`, `/new` | Olmayan personel ve her istisna "başarılı" sayılıyor; bitiş < başlangıç kontrolü yok; böyle bir talep ve yalnızca hafta sonunu kapsayan talep 0 günle kaydediliyor. | BR-6 |
 | D8 | `create_request` | Geçmiş tarihli talep herkese açık. | BR-7 |
 | D9 | genel | Güvenlik açıkları: kimlik doğrulama yok, stored XSS (`body\|safe`), CSRF yok, `debug=True`, hata mesajında dahili kod ve telefon. Ayrıntı: `docs/security.md`. | — |
-| D10 | `recalculate_year_end` | Devir hesabı yorum satırında; 5 gün tavanı BR-4'e aykırı. | BR-4 |
-| D11 | `get_used_days` | Kullanılan izin tüm yıllardan toplanıyor, hak yıllık; izin yılı kavramı yok. | BR-4 |
 | D12 | `/requests`, `/new` | Neden alanı herkese görünüyor, uyarı yok. | BR-9 |
-| D13 | `seed`, `get_used_days`, `status_badge`, `/` | Durum kayıtta Türkçe string (`"Onaylandi"` …) ve string literal ile karşılaştırılıyor (bir yerde `status.lower()`). Kural: kayıtta `pending`/`approved`/`rejected`, `LeaveStatus` enum'u. | `docs/conventions.md` Naming |
-| D14 | `get_remaining` | Kalan = Hak − Kullanılan, alt sınır yok: Kalan negatife düşebiliyor (ör. kıdem 0 iken onaylı talep varsa). Spec 0001 / plan 0001 R6'da bulundu. | I-1 |
-| D15 | `working_days` (`leavemanager/domain/leave_rules.py`) | Hafta içine denk gelen resmî tatil ve bayram günleri izin günü sayılıyor (ör. 2026-10-29 Perşembe, Cumhuriyet Bayramı: 1 gün). Takvimin kaynağı açık karar. Spec 0002 review'unda (R1-2) bulundu. | BR-3 |
+| D13 | `seed`, `get_balance`, `status_badge`, `/` | Durum kayıtta Türkçe string (`"Onaylandi"` …) ve string literal ile karşılaştırılıyor (bir yerde `status.lower()`). Kural: kayıtta `pending`/`approved`/`rejected`, `LeaveStatus` enum'u. | `docs/conventions.md` Naming |
+| D14 | `leave_balance` (`leavemanager/domain/leave_rules.py`) | Kalan = Devir + Hak − Kullanılan − Bekleyen, alt sınır yok: Kalan negatife düşebiliyor (ör. kıdem 0 iken onaylı talep varsa). Spec 0001 / plan 0001 R6'da bulundu. | I-1 |
+| D15 | `working_days` (`leavemanager/domain/leave_rules.py`) | Hafta içine denk gelen resmî tatil ve bayram günleri izin günü sayılıyor (ör. 2026-10-29 Perşembe, Cumhuriyet Bayramı: 1 gün). Seed'de Ayşe'nin 2026-07-06 → 2026-07-17 talebi 15 Temmuz Çarşamba'yı kapsıyor ve 10 gün sayılıyor (tatil listesi İK teyidi ister). Takvimin kaynağı açık karar. Spec 0002 review'unda (R1-2) bulundu. | BR-3 |
 
 ## Open decisions
 - Kanun atıflarının (BR-1, BR-3, BR-4) İK / hukuk tarafından teyidi.
 - Yöneticinin hangi personelin taleplerini onaylayacağı (birim bazlı mı?).
 - Talep iptali (kim, hangi durumdayken).
 - Resmî tatil takviminin kaynağı (BR-3).
-- Açılış bakiyesi: geçmiş yılların kullanım verisi yok; BR-4 uygulanırken spec'te karar.
+- Gerçek açılış bakiyeleri: geçmiş yılların kullanım verisi yok. Spec 0003 kararı: hesap işe
+  girişten başlar, açılış devri 0; bu yüzden devirler gerçeğinden büyük çıkar. Canlıya geçmeden
+  önce İK'nın gerçek devirleri yüklenmeli (ayrı iş).
 
 ## Out of scope (şimdilik)
 - Yaşa bağlı kural (18 yaş ve altı, 50 yaş ve üstü en az 20 gün) — doğum tarihi verisi yok.
