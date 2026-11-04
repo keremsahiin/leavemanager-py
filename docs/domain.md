@@ -65,17 +65,17 @@ düzelten işin spec'ine / raporuna referansla buradan silinir.
 Kapananlar: **D3, D4** — spec 0002 (kıdem yıldönümü ve iş günü sayımı) · **D5, D10, D11** —
 spec 0003 (bekleyen düşümü, izin yılı ve devir).
 
-| # | Yer (`app.py`) | Gözlem | Kural |
+| # | Yer (aksi yazılmadıkça `app.py`) | Gözlem | Kural |
 |---|---|---|---|
-| D1 | `get_entitlement` | Yorum "1–5 yıl 15 gün" diyor, kod 14 döndürüyor (kod doğru, yorum yanlış). | BR-1 |
-| D2 | `get_entitlement` | Tam 15 yıl kıdeme 20 gün veriyor; kural 26. | BR-1 |
+| D1 | `get_entitlement` (yorum), `annual_entitlement` (`leavemanager/domain/leave_rules.py`) | Yorum "1–5 yıl 15 gün" diyor, kod 14 döndürüyor (kod doğru, yorum yanlış). | BR-1 |
+| D2 | `annual_entitlement` (`leavemanager/domain/leave_rules.py`) | Tam 15 yıl kıdeme 20 gün veriyor; kural 26. Birikime de girer: 15. yılı geçen personelin Devir'i kalıcı olarak 6 gün eksik (Ayşe 322, doğrusu 328). | BR-1 |
 | D6 | `create_request` ↔ `/new` | Route `< days`, servis `<= days` kontrol ediyor; eşitlikte talep sessizce kaydedilmiyor. | BR-5 |
 | D7 | `create_request`, `/new` | Olmayan personel ve her istisna "başarılı" sayılıyor; bitiş < başlangıç kontrolü yok; böyle bir talep ve yalnızca hafta sonunu kapsayan talep 0 günle kaydediliyor. | BR-6 |
 | D8 | `create_request` | Geçmiş tarihli talep herkese açık. | BR-7 |
 | D9 | genel | Güvenlik açıkları: kimlik doğrulama yok, stored XSS (`body\|safe`), CSRF yok, `debug=True`, hata mesajında dahili kod ve telefon. Ayrıntı: `docs/security.md`. | — |
 | D12 | `/requests`, `/new` | Neden alanı herkese görünüyor, uyarı yok. | BR-9 |
-| D13 | `seed`, `get_used_days`, `status_badge`, `/` | Durum kayıtta Türkçe string (`"Onaylandi"` …) ve string literal ile karşılaştırılıyor (bir yerde `status.lower()`). Kural: kayıtta `pending`/`approved`/`rejected`, `LeaveStatus` enum'u. | `docs/conventions.md` Naming |
-| D14 | `leave_balance` | Kalan = Devir + Hak − Kullanılan − Bekleyen, alt sınır yok: Kalan negatife düşebiliyor (ör. kıdem 0 iken onaylı talep varsa). Spec 0001 / plan 0001 R6'da bulundu. | I-1 |
+| D13 | `seed`, `get_balance`, `status_badge`, `/` | Durum kayıtta Türkçe string (`"Onaylandi"` …) ve string literal ile karşılaştırılıyor (bir yerde `status.lower()`). Kural: kayıtta `pending`/`approved`/`rejected`, `LeaveStatus` enum'u. | `docs/conventions.md` Naming |
+| D14 | `leave_balance` (`leavemanager/domain/leave_rules.py`) | Kalan = Devir + Hak − Kullanılan − Bekleyen, alt sınır yok: Kalan negatife düşebiliyor (ör. kıdem 0 iken onaylı talep varsa). Spec 0001 / plan 0001 R6'da bulundu. | I-1 |
 | D15 | `working_days` (`leavemanager/domain/leave_rules.py`) | Hafta içine denk gelen resmî tatil ve bayram günleri izin günü sayılıyor (ör. 2026-10-29 Perşembe, Cumhuriyet Bayramı: 1 gün). Takvimin kaynağı açık karar. Spec 0002 review'unda (R1-2) bulundu. | BR-3 |
 
 ## Open decisions
