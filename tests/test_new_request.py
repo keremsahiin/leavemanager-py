@@ -1,4 +1,4 @@
-"""Yeni talep (`/new`) — spec 0001 PB-8…PB-14; spec 0002 CB-3 (iş günüyle bakiye kontrolü).
+"""Yeni talep (`/new`) — spec 0001 PB-8…PB-14; spec 0002 CB-3; spec 0003 CB-3 (bakiye).
 Bugün = 2026-10-25.
 
 `test_d<n>_` ile başlayan testler bilinen bir sapmanın BUGÜNKÜ davranışını sabitler
@@ -58,15 +58,12 @@ def test_valid_request_is_pending_and_redirects(client: FlaskClient) -> None:
     assert counter(parse(client.get("/").text), "Bekleyen") == 5
 
 
-def test_d5_valid_request_does_not_change_remaining(client: FlaskClient) -> None:
-    """PB-9 — bilinen sapma D5 (docs/domain.md): yeni (bekleyen) talep Kalan'ı düşürmez.
-
-    Bugünkü davranışı sabitler; D5 düzeltmesi bu testi bilinçli olarak değiştirir.
-    """
+def test_br4_new_request_reduces_remaining(client: FlaskClient) -> None:
+    """BR-4, spec 0003 CB-3 — geçerli yeni talep kaydedildiği anda Bekleyen ve Kalan'a yansır."""
     form = {"employee_id": "2", "start": "2026-11-16", "end": "2026-11-18", "reason": "Test"}
     client.post("/new", data=form)
     mehmet = next(r for r in parse(client.get("/").text).rows if r[0] == "Mehmet Demir")
-    assert mehmet[2:] == ["20", "0", "20"]
+    assert mehmet[2:] == ["20", "90", "0", "6", "104"]
 
 
 def test_missing_reason_saved_empty(client: FlaskClient) -> None:
@@ -86,7 +83,7 @@ def test_missing_reason_saved_empty(client: FlaskClient) -> None:
 @pytest.mark.parametrize(
     ("employee_id", "start", "end"),
     [
-        ("3", "2026-12-01", "2026-12-21"),  # Zeynep, Kalan 14, 15 iş günü
+        ("3", "2026-12-01", "2026-12-18"),  # Zeynep, Kalan 13, 14 iş günü
         ("5", "2026-11-16", "2026-11-16"),  # Elif, Kalan 0, 1 gün
     ],
 )
@@ -96,8 +93,7 @@ def test_d9_insufficient_balance_shows_internal_error_text(
     """PB-10 — bilinen sapma D9 (docs/domain.md, docs/security.md): hata mesajı dahili kod ve
     dahili telefon numarası içerir.
 
-    Bugünkü davranışı sabitler; D9 düzeltmesi bu testi bilinçli olarak değiştirir. Zeynep
-    örneği D5 düzeltmesinden etkilenmez (Kalan 13 olur, 15 iş günü yine fazla).
+    Bugünkü davranışı sabitler; D9 düzeltmesi bu testi bilinçli olarak değiştirir.
     """
     form = {"employee_id": employee_id, "start": start, "end": end, "reason": "x"}
     response = client.post("/new", data=form)
@@ -107,33 +103,31 @@ def test_d9_insufficient_balance_shows_internal_error_text(
 
 
 def test_d6_equal_to_remaining_is_silently_dropped(client: FlaskClient) -> None:
-    """PB-11 — bilinen sapma D6 (docs/domain.md): talep günü Kalan'a eşitse (Zeynep, 14 iş
+    """PB-11 — bilinen sapma D6 (docs/domain.md): talep günü Kalan'a eşitse (Zeynep, 13 iş
     günü) kayıt oluşmaz ve hata gösterilmez (BR-5: kabul edilmeli).
 
-    Bugünkü davranışı sabitler; D6 ve D5 (Kalan'dan bekleyen düşülmez) düzeltmeleri bu testi
-    bilinçli olarak değiştirir. "Hata gösterilmez": yönlendirilen liste sayfası POST'tan önceki
-    haliyle aynıdır — ne yeni kayıt ne mesaj (VERIFY G1).
+    Bugünkü davranışı sabitler; D6 düzeltmesi bu testi bilinçli olarak değiştirir. "Hata
+    gösterilmez": yönlendirilen liste sayfası POST'tan önceki haliyle aynıdır — ne yeni kayıt
+    ne mesaj (VERIFY G1).
     """
     before = list_text(client)
-    form = {"employee_id": "3", "start": "2026-12-01", "end": "2026-12-18", "reason": "Esit"}
+    form = {"employee_id": "3", "start": "2026-12-01", "end": "2026-12-17", "reason": "Esit"}
     assert_redirects_to_list(client.post("/new", data=form))
     assert list_text(client) == before
     assert len(request_rows(client)) == SEED_REQUEST_COUNT
 
 
 def test_one_below_remaining_is_saved(client: FlaskClient) -> None:
-    """PB-11 — Kalan − 1 gün (Zeynep, 13 iş günü) kaydedilir. Değerler D5'e (Kalan'dan bekleyen
-    düşülmez) bağlıdır; o düzeltme bu beklentiyi de bilinçli olarak değiştirir
-    (docs/domain.md)."""
-    form = {"employee_id": "3", "start": "2026-12-01", "end": "2026-12-17", "reason": "Bir eksik"}
+    """PB-11 — Kalan − 1 gün (Zeynep, 12 iş günü) kaydedilir."""
+    form = {"employee_id": "3", "start": "2026-12-01", "end": "2026-12-16", "reason": "Bir eksik"}
     assert_redirects_to_list(client.post("/new", data=form))
     rows = request_rows(client)
     assert len(rows) == SEED_REQUEST_COUNT + 1
-    assert rows[-1][:4] == ["Zeynep Kaya", "2026-12-01", "2026-12-17", "13"]
+    assert rows[-1][:4] == ["Zeynep Kaya", "2026-12-01", "2026-12-16", "12"]
 
 
 def test_br3_balance_check_counts_weekdays(client: FlaskClient) -> None:
-    """BR-3, spec 0002 CB-3 — bakiye kontrolü iş günüyle yapılır: Zeynep'in (Kalan 14)
+    """BR-3, spec 0002 CB-3 — bakiye kontrolü iş günüyle yapılır: Zeynep'in (Kalan 13)
     15 takvim günü süren, 11 iş günlük talebi kaydedilir."""
     form = {"employee_id": "3", "start": "2026-12-01", "end": "2026-12-15", "reason": "Is gunu"}
     assert_redirects_to_list(client.post("/new", data=form))

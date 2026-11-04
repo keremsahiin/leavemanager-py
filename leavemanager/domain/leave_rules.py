@@ -1,7 +1,23 @@
 """İzin kuralları (docs/domain.md). Saf fonksiyonlar: "bugün" parametre olarak gelir (F1, F6)."""
 
 import calendar
+from collections.abc import Sequence
+from dataclasses import dataclass
 from datetime import date
+
+
+@dataclass(frozen=True)
+class LeaveBalance:
+    """BR-4 — bir personelin bakiyesi; gün sayıları `int`."""
+
+    entitlement: int  # bu izin yılının hakkı
+    carried_over: int  # önceki izin yıllarından devreden
+    used: int  # bu izin yılında veya sonrasında başlayan onaylı talepler
+    pending: int  # tüm bekleyen talepler
+
+    @property
+    def remaining(self) -> int:
+        return self.carried_over + self.entitlement - self.used - self.pending
 
 
 def _anniversary(hire_date: date, year: int) -> date:
@@ -20,6 +36,45 @@ def completed_years(hire_date: date, today: date) -> int:
     if today < _anniversary(hire_date, today.year):
         years -= 1
     return max(years, 0)
+
+
+def annual_entitlement(years: int) -> int:
+    """BR-1 — kıdeme göre bir izin yılının hakkı. Kıdem 15'te 20 gün: sapma D2 (kural 26)."""
+    if years < 1:
+        return 0
+    if years <= 5:
+        return 14
+    if years <= 15:
+        return 20
+    return 26
+
+
+def leave_year_start(hire_date: date, today: date) -> date:
+    """Bugünü içeren izin yılının ilk günü: son yıldönümü, kıdem 0 iken işe giriş günü."""
+    return _anniversary(hire_date, hire_date.year + completed_years(hire_date, today))
+
+
+def leave_balance(
+    hire_date: date,
+    today: date,
+    approved: Sequence[tuple[date, int]],
+    pending_days: int,
+) -> LeaveBalance:
+    """BR-4 — her yıldönümünde yeni hak eklenir, kullanılmayan gün devreder, tavan yoktur.
+
+    `approved`: onaylı taleplerin (başlangıç, izin günü) çiftleri; talep, başladığı izin yılına
+    tümüyle yazılır. Hesap işe girişten başlar, açılış devri 0 (spec 0003).
+    """
+    years = completed_years(hire_date, today)
+    year_start = leave_year_start(hire_date, today)
+    earned_before = sum(annual_entitlement(year) for year in range(1, years))
+    used_before = sum(days for start, days in approved if start < year_start)
+    return LeaveBalance(
+        entitlement=annual_entitlement(years),
+        carried_over=earned_before - used_before,
+        used=sum(days for start, days in approved if start >= year_start),
+        pending=pending_days,
+    )
 
 
 def working_days(start: date, end: date) -> int:
