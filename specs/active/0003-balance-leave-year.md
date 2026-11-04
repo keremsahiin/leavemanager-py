@@ -7,7 +7,8 @@
   `/change "B2-B3-B4-B5 tek kalemde yap"`. Ticket sistemi yok. Satır 7–8: spec 0002.
 - Design: Tasarım dosyası yok. Değişen görünüm ana sayfadaki bakiye tablosu (CB-2); sayfanın
   mevcut stili korunur. Kanıt: önce / sonra ekran görüntüsü (VERIFY).
-- Supersedes: 0002/CB-2 (ana sayfa değerleri), 0002/CB-3 (örnek değerler), 0002/PB-2
+- Supersedes: 0002/CB-2 (ana sayfa değerleri), 0002/CB-3 (örnek değerler), 0002/PB-2,
+  0001/PB-9 (Kalan değişmez cümlesi)
 
 ## Intent
 Bakiye yasal kurala uygun hesaplansın: bekleyen talepler bakiyeden düşülsün ve her izin yılında
