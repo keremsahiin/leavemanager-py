@@ -4,6 +4,7 @@
 (docs/domain.md, Known deviations). O sapmanın düzeltmesi testi bilinçli olarak değiştirir.
 """
 
+import pytest
 from flask.testing import FlaskClient
 from pages import parse
 
@@ -54,17 +55,24 @@ def test_d13_status_text_and_color(client: FlaskClient) -> None:
     assert colors["Reddedildi"] == "red"
 
 
-def test_d9_reason_rendered_unescaped(client: FlaskClient) -> None:
-    """PB-7 — bilinen sapma D9 (docs/domain.md, docs/security.md): neden metni HTML kaçışlaması
-    yapılmadan sayfaya yazılır (stored XSS).
-
-    Bugünkü davranışı sabitler; D9 düzeltmesi bu testi bilinçli olarak değiştirir.
-    """
-    form = {"employee_id": "2", "start": "2026-11-10", "end": "2026-11-10"}
-    client.post("/new", data={**form, "reason": "<script>alert(1)</script>"})
+@pytest.mark.parametrize(
+    "reason",
+    [
+        "<script>alert(1)</script>",
+        "<img src=x onerror=alert(1)>",
+        "</td></tr></table><h1>Sahte</h1>",
+        'Ali & Veli\'nin "tatili"',
+    ],
+    ids=["script", "event-handler", "breaks-table", "plain-characters"],
+)
+def test_security_reason_is_shown_as_plain_text(client: FlaskClient, reason: str) -> None:
+    """docs/security.md, Input & output — stored XSS (D9): neden metni HTML olarak yorumlanmaz;
+    kullanıcı yazılan metni aynen, düz metin olarak görür."""
+    form = {"employee_id": "2", "start": "2026-11-10", "end": "2026-11-10", "reason": reason}
+    client.post("/new", data=form)
     html = client.get("/requests").text
-    assert "<script>alert(1)</script>" in html
-    assert "&lt;script&gt;" not in html
+    assert reason not in html
+    assert parse(html).rows[-1][4] == reason
 
 
 def test_d12_reason_visible_to_everyone(client: FlaskClient) -> None:
