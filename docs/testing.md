@@ -25,7 +25,9 @@ ANEW kurallarıdır ve olduğu gibi geçerlidir.
   `tests/conftest.py`'dir. Her testte `app` modülünü yeniden yükler (`importlib.reload`) ve
   `app.app.test_client()` kullanır. Bu yüzden `app.py` modül düzeyinde bir `app` (Flask)
   nesnesi sunmayı ve **her yüklemede temiz seed verisiyle başlamayı** sürdürmelidir; katmanlı
-  pakete taşıyan refactor bu sözleşmeyi korunan davranış olarak alır.
+  pakete taşıyan refactor bu sözleşmeyi korunan davranış olarak alır. Sözleşme `app.py`'ye
+  bağlanan testler içindir: `leavemanager/domain`'in saf fonksiyonları doğrudan çağrılabilir
+  (`tests/test_leave_rules.py`).
 - Baseline (karakterizasyon) testleri yalnızca HTTP konuşur ve sayfaları içerikten okur
   (`tests/pages.py`: tablo hücreleri, bağlantılar, form alanları, metnin rengi), etiket
   yapısından değil. Bilinen bir sapmayı sabitleyen test `test_d<n>_` ile başlar; o sapmanın
