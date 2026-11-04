@@ -39,9 +39,9 @@ def test_counters_with_seed_data(client: FlaskClient) -> None:
 
 
 def test_balance_table_with_seed_data(client: FlaskClient) -> None:
-    """Spec 0003 CB-2; reddedilen talepler hiçbir sütunu etkilemez (CB-1). Ayşe'nin Devir ve
-    Kalan değerleri D2'ye bağlıdır (15. yılın hakkı 20); o düzeltme bu beklentiyi de bilinçli
-    olarak değiştirir (docs/domain.md)."""
+    """Spec 0003 CB-2; reddedilen talepler hiçbir sütunu etkilemez (CB-1). Ayşe'nin satırı D2'ye
+    (15. yılın hakkı 20) ve D15'e (talebi 15 Temmuz'u kapsıyor) bağlıdır; o düzeltmeler bu
+    beklentiyi de bilinçli olarak değiştirir (docs/domain.md)."""
     response = client.get("/")
     assert response.status_code == 200
     page = parse(response.text)
@@ -134,7 +134,7 @@ def test_br4_used_counts_from_current_leave_year(
 ) -> None:
     """BR-4, spec 0003 CB-1 — her yıldönümünde yeni hak eklenir, kullanılmayan gün devreder;
     Kullanılan bu izin yılında başlayan onaylı talepleri sayar. Ayşe'nin onaylı talebi
-    2026-07-06 → 2026-07-17: 10 iş günü. Devir ve Kalan D2'ye bağlıdır (docs/domain.md)."""
+    2026-07-06 → 2026-07-17: 10 iş günü. Değerler D2'ye ve D15'e bağlıdır (docs/domain.md)."""
     assert balances(client_on(today))[AYSE] == expected
 
 
@@ -171,6 +171,7 @@ def test_d14_remaining_can_go_negative(client_on: Callable[[date], FlaskClient])
     """Bilinen sapma D14 (docs/domain.md): Kalan negatife düşebilir (I-1 ihlali). Kıdem 0 iken
     gelecekteki onaylı (10) ve bekleyen (3) talepler düşülür.
 
-    Bugünkü davranışı sabitler; D14 düzeltmesi bu testi bilinçli olarak değiştirir.
+    Bugünkü davranışı sabitler; D14 ve D15 (talep 15 Temmuz'u kapsıyor) düzeltmeleri bu testi
+    bilinçli olarak değiştirir.
     """
     assert balances(client_on(date(2009, 1, 1)))[AYSE] == (0, 0, 10, 3, -13)

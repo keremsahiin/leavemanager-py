@@ -20,8 +20,9 @@ SEED_REQUESTS = [  # Personel, Başlangıç, Bitiş, Gün, Neden, Durum — kay�
 
 
 def test_lists_seed_requests_in_order(client: FlaskClient) -> None:
-    """PB-5; spec 0002 CB-2 (Gün iş günü). Değerler D13'e (durum kayıttaki metniyle) bağlıdır;
-    o düzeltme bu beklentiyi de bilinçli olarak değiştirir (docs/domain.md)."""
+    """PB-5; spec 0002 CB-2 (Gün iş günü). Değerler D13'e (durum kayıttaki metniyle) ve D15'e
+    (ilk talep 15 Temmuz'u kapsıyor) bağlıdır; o düzeltmeler bu beklentiyi de bilinçli olarak
+    değiştirir (docs/domain.md)."""
     response = client.get("/requests")
     assert response.status_code == 200
     page = parse(response.text)

@@ -76,7 +76,7 @@ spec 0003 (bekleyen düşümü, izin yılı ve devir).
 | D12 | `/requests`, `/new` | Neden alanı herkese görünüyor, uyarı yok. | BR-9 |
 | D13 | `seed`, `get_balance`, `status_badge`, `/` | Durum kayıtta Türkçe string (`"Onaylandi"` …) ve string literal ile karşılaştırılıyor (bir yerde `status.lower()`). Kural: kayıtta `pending`/`approved`/`rejected`, `LeaveStatus` enum'u. | `docs/conventions.md` Naming |
 | D14 | `leave_balance` (`leavemanager/domain/leave_rules.py`) | Kalan = Devir + Hak − Kullanılan − Bekleyen, alt sınır yok: Kalan negatife düşebiliyor (ör. kıdem 0 iken onaylı talep varsa). Spec 0001 / plan 0001 R6'da bulundu. | I-1 |
-| D15 | `working_days` (`leavemanager/domain/leave_rules.py`) | Hafta içine denk gelen resmî tatil ve bayram günleri izin günü sayılıyor (ör. 2026-10-29 Perşembe, Cumhuriyet Bayramı: 1 gün). Takvimin kaynağı açık karar. Spec 0002 review'unda (R1-2) bulundu. | BR-3 |
+| D15 | `working_days` (`leavemanager/domain/leave_rules.py`) | Hafta içine denk gelen resmî tatil ve bayram günleri izin günü sayılıyor (ör. 2026-10-29 Perşembe, Cumhuriyet Bayramı: 1 gün). Seed'de Ayşe'nin 2026-07-06 → 2026-07-17 talebi 15 Temmuz Çarşamba'yı kapsıyor ve 10 gün sayılıyor (tatil listesi İK teyidi ister). Takvimin kaynağı açık karar. Spec 0002 review'unda (R1-2) bulundu. | BR-3 |
 
 ## Open decisions
 - Kanun atıflarının (BR-1, BR-3, BR-4) İK / hukuk tarafından teyidi.
