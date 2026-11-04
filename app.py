@@ -4,6 +4,7 @@
 # NOT: Bu dosyaya dokunmadan once Ahmet'e sor. (Ahmet 2019'da ayrildi)
 from flask import Flask, request, redirect, render_template_string
 from datetime import datetime, date
+from leavemanager.domain.leave_rules import completed_years, working_days
 
 app = Flask(__name__)
 
@@ -55,9 +56,8 @@ class LeaveService:
         return 26
 
     def get_seniority_years(self, emp):
-        # yil farki yeterli, ay/gun onemli degil dedi IK (2015)
         today = datetime.now().date()
-        return today.year - emp["hire_date"].year
+        return completed_years(emp["hire_date"], today)
 
     # def recalculate_year_end(self):
     #     # yil sonunda devreden izinleri yeniden hesapla
@@ -76,8 +76,7 @@ class LeaveService:
         return total
 
     def calc_days(self, start, end):
-        # is gunu hesabi
-        return (end - start).days + 1
+        return working_days(start, end)
 
     def get_remaining(self, emp):
         # bekleyenler de dusulecek mi? simdilik hayir (2018'de konusuldu, karar yok)
@@ -160,7 +159,7 @@ def new_request():
             start = datetime.strptime(request.form["start"], "%Y-%m-%d").date()
             end = datetime.strptime(request.form["end"], "%Y-%m-%d").date()
             emp = [e for e in Db.employees if e["id"] == emp_id][0]
-            days = (end - start).days + 1
+            days = svc.calc_days(start, end)
             # bakiye kontrolu (serviste de var ama formda erken uyari iyi oluyor)
             if svc.get_remaining(emp) < days:
                 return render_template_string(PAGE, body="<p style='color:red'>HATA: ERR-412 NullReferenceGibi - bakiye yetersiz. IT'ye bildirin: dahili 4127</p>")
