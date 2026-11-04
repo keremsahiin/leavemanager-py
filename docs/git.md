@@ -39,8 +39,8 @@ Uzak depo: **GitHub**. Varsayılan branch: `main`.
   açıksa zorunlu onay 1'e çıkar.
 - **Branch koruması (`main`)**: PR zorunlu; `doctor` ve `check` job'ları zorunlu durum kontrolü
   (`audit` bilgilendirici); force push ve silme kapalı. GitHub ayarından elle yapılır.
-  **Şu an uygulanmıyor (2026-11-04):** depo özel; GitHub korumayı yalnızca Pro hesapta ya da
-  herkese açık depoda açıyor (HTTP 403). Bu kuralları şimdilik yalnızca çalışma disiplini tutar.
+  **Şu an uygulanmıyor (2026-11-04):** depo özel; GitHub korumayı açmak için Pro'ya geçmeyi ya da
+  depoyu herkese açmayı istiyor (HTTP 403). Bu kuralları şimdilik yalnızca çalışma disiplini tutar.
   CI'daki `doctor` / `check` her push ve PR'da çalışır ama yalnızca sonucu bildirir: kırmızı
   sonuç merge'ü, doğrudan push'u, force push'u ya da silmeyi engellemez. Hesap Pro'ya geçerse ya
   da depo herkese açılırsa koruma elle açılır. O zamana kadar `workflows/segments.md` ve PR
