@@ -84,6 +84,14 @@ def test_br1_15_years_gives_26_days(
     assert balances(client_on(today))[name][0] == entitlement
 
 
+def test_br1_15th_year_entitlement_reaches_remaining(
+    client_on: Callable[[date], FlaskClient],
+) -> None:
+    """BR-1 ve BR-4 (D2 düzeltmesi) — kıdem 15'in 26 günü Kalan'a da girer. Ayşe 2023-03-15: Devir
+    5×14 + 9×20 = 250. Kullanılan 10 D15'e bağlıdır (docs/domain.md)."""
+    assert balances(client_on(date(2023, 3, 15)))[AYSE] == (26, 250, 10, 3, 263)
+
+
 @pytest.mark.parametrize(
     ("name", "today", "entitlement"),
     [
@@ -160,7 +168,7 @@ def test_br4_pending_days_deducted(client: FlaskClient) -> None:
     assert table["Mehmet Demir"] == (20, 90, 0, 3, 107)
 
 
-@pytest.mark.parametrize("today", [date(2026, 10, 25), date(2027, 3, 15)])
+@pytest.mark.parametrize("today", [date(2023, 3, 15), date(2026, 10, 25), date(2027, 3, 15)])
 def test_br4_row_arithmetic(client_on: Callable[[date], FlaskClient], today: date) -> None:
     """Spec 0003 CB-2 — her satırda Kalan = Devir + Hak − Kullanılan − Bekleyen."""
     for entitlement, carried, used, pending, remaining in balances(client_on(today)).values():
