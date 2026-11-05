@@ -1,8 +1,6 @@
 # Conventions
 
 Buradaki her kural ya araçla denetlenir (tercih edilen) ya da review'da kontrol edilir.
-Eski `app.py` bu kurallara uymaz; bu kayıtlı ve beklenen bir durumdur, katmanlı pakete taşıyan
-refactor spec'iyle kapanır (`docs/architecture.md`, Geçiş durumu). Yeni kod uyar.
 
 ## Language
 <!-- Set at bootstrap (step 0) and mirrored in AGENTS.md. Changing it later is allowed — edit both
@@ -50,7 +48,7 @@ refactor spec'iyle kapanır (`docs/architecture.md`, Geçiş durumu). Yeni kod u
 ## Data rules
 - Tarih alanları `datetime.date`. Aralıklar iki ucu da **dahil** hesaplanır.
 - "Bugün" Europe/Istanbul saatine göre takvim günüdür ve yalnızca `leavemanager/clock.py`'den gelir
-  (`zoneinfo`; Windows için `tzdata` paketi — onaylı, onu kullanan iş ekler). Domain "bugün"ü
+  (`zoneinfo`; Windows için `tzdata` paketi). Domain "bugün"ü
   parametre olarak alır.
 - Zaman damgası gerekirse saat dilimi bilgili (aware) UTC `datetime`.
 - Gün sayıları her zaman `int`; `float` kullanılmaz.
@@ -62,13 +60,11 @@ refactor spec'iyle kapanır (`docs/architecture.md`, Geçiş durumu). Yeni kod u
 ## Enforced by tooling
 `./scripts/check` içinde (`scripts/check.conf`), ayarlar `pyproject.toml`'da:
 - **ruff check** — `E`, `W`, `F` (temel hatalar), `I` (import sırası), `B` (olası buglar), `UP`
-  (güncel sözdizimi), `S` (güvenlik, ör. `debug=True` → S201), `TID251` (F6: "bugün" yalnızca
-  `clock.py`). Satır uzunluğu 100.
+  (güncel sözdizimi), `S` (güvenlik), `TID251` (F6: "bugün" yalnızca `clock.py`), `RUF100`
+  (hiçbir şeyi bastırmayan `noqa`). Satır uzunluğu 100. `S201` (`debug=True`) yalnızca `Flask(...)`
+  ile kurulan uygulamayı görür; `create_app` üzerinden açılan debug review'da kontrol edilir.
 - **ruff format --check** — biçim tartışması review'da yapılmaz; formatlayıcı karar verir.
   Yalnızca `*.py` / `*.pyi` dosyalarına bakılır.
-- **lint-imports** (import-linter) — katman kuralları F1–F5 (`docs/architecture.md`); check adımı
-  refactor spec'iyle eklenir, kurallar şimdiden `pyproject.toml`'da.
-- **GEÇİCİ istisna:** eski `app.py` yalnızca `E`/`W`/`F` kurallarına tabidir ve formatlanmaz.
-  Katmanlı pakete taşıyan refactor spec'i istisnayı `pyproject.toml`'dan kaldırır.
+- **lint-imports** (import-linter) — katman kuralları F1–F5 (`docs/architecture.md`).
 - Review'da kontrol edilenler (henüz araç yok): Naming'deki domain/etiket ayrımı, Error handling
   yasakları, log'da kişisel veri.

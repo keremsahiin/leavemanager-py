@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block content -%}
+<div class='kutu'>Bekleyen: <b>{{ counts.pending }}</b></div><div class='kutu'>Onaylanan: <b>{{ counts.approved }}</b></div><div class='kutu'>Reddedilen: <b>{{ counts.rejected }}</b></div><h3>Personel Bakiyeleri</h3><table><tr><th>Ad</th><th>Birim</th><th>Hak</th><th>Devir</th><th>Kullanilan</th><th>Bekleyen</th><th>Kalan</th></tr>
+{%- for row in rows -%}
+<tr><td>{{ row.employee.name }}</td><td>{{ row.employee.department }}</td><td>{{ row.balance.entitlement }}</td><td>{{ row.balance.carried_over }}</td><td>{{ row.balance.used }}</td><td>{{ row.balance.pending }}</td><td>{{ row.balance.remaining }}</td></tr>
+{%- endfor -%}
+</table>
+{%- endblock %}

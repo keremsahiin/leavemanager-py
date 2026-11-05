@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block content -%}
+<h3>Yeni Talep</h3><form method="post">
+    Personel: <select name="employee_id">{% for employee in employees %}<option value='{{ employee.id }}'>{{ employee.name }}</option>{% endfor %}</select><br><br>
+    Baslangic: <input type="date" name="start"><br><br>
+    Bitis: <input type="date" name="end"><br><br>
+    Neden: <input type="text" name="reason"><br><br>
+    <input type="submit" value="Kaydet"></form>
+{%- endblock %}

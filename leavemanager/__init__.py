@@ -1,1 +1,1 @@
-"""LeaveManager — katmanlı paket (docs/architecture.md). Taşıma refactor spec'iyle tamamlanır."""
+"""LeaveManager — katmanlı paket: domain, services, storage, web (docs/architecture.md)."""

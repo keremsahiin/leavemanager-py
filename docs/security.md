@@ -17,12 +17,13 @@ Her plan ve review bu tabana uyar. Bugünkü koddaki açıklar bilinen sapma **D
 ## Input & output
 - HTML yalnızca **Jinja şablon dosyalarından**, otomatik kaçışlama (autoescape) açıkken üretilir.
   `render_template_string`, string birleştirerek HTML üretmek ve kullanıcı verisiyle `|safe` /
-  `Markup` **yasak** (stored XSS — D9).
+  `Markup` **yasak** (stored XSS).
 - Her POST formunda CSRF koruması: **Flask-WTF `CSRFProtect`** (onaylı; D9 düzeltmesi ekler).
 - Girdi doğrulaması sınırda (`web`) tip dönüşümüyle, iş kuralı doğrulaması `domain`'de yapılır;
   geçersiz girdi kullanıcıya anlaşılır hata olarak döner (`docs/conventions.md`, Error handling).
 - Kullanıcıya traceback, dahili hata kodu, sunucu/kişi bilgisi gösterilmez.
-- `debug=True` kodda **yasak** (Werkzeug debugger = uzaktan kod çalıştırma; ruff `S201`).
+- `debug=True` kodda **yasak** (Werkzeug debugger = uzaktan kod çalıştırma). Ruff `S201` uygulama
+  `create_app` ile kurulduğunda bunu görmez: review'da kontrol edilir. Bugün `app.py`'de duruyor (D9).
   Debug yalnızca yerelde `FLASK_DEBUG=1` ortam değişkeniyle açılır.
 - Log'a kişisel veri ve neden metni yazılmaz; log'larda yalnızca kayıt ID'leri bulunur.
 
@@ -41,7 +42,7 @@ Her plan ve review bu tabana uyar. Bugünkü koddaki açıklar bilinen sapma **D
   standart kütüphanede karşılığı yok.
 - Bilinen açıklar (CVE): CI'da ayrı `audit` job'ı, `pip-audit -r requirements.txt`. Ağ
   gerektirdiği için `scripts/check`'e girmez.
-- Onaylı ama henüz eklenmemiş: Flask-WTF (CSRF), `tzdata` (Windows saat dilimi).
+- Onaylı ama henüz eklenmemiş: Flask-WTF (CSRF).
 
 ## Review lens
 Security is a mandatory dimension of every independent review (see `prompts/review.md`), not a
