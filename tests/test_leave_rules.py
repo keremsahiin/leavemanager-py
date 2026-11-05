@@ -2,7 +2,6 @@
 
 HTTP'de onay yolu yok ve seed'de tek onaylı talep var; bu sınırlar ancak `leave_balance` doğrudan
 çağrılarak sınanır. Saf fonksiyon olduğu için "bugün" parametre olarak verilir, saat dondurulmaz.
-Kıdem 15'e ulaşılmaz: değerler D2'den bağımsızdır.
 """
 
 from datetime import date

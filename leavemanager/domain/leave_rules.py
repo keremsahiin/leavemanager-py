@@ -39,12 +39,12 @@ def completed_years(hire_date: date, today: date) -> int:
 
 
 def annual_entitlement(years: int) -> int:
-    """BR-1 — kıdeme göre bir izin yılının hakkı. Kıdem 15'te 20 gün: sapma D2 (kural 26)."""
+    """BR-1 — kıdeme göre bir izin yılının hakkı."""
     if years < 1:
         return 0
     if years <= 5:
         return 14
-    if years <= 15:
+    if years <= 14:
         return 20
     return 26
 

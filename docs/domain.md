@@ -32,7 +32,7 @@ değil. Belge–kod çelişkisi yalnızca bu listede olmayan bir sapma için ram
 mimariye uymaması ayrıca kayıtlıdır: refactor spec'ine kadar beklenen durumdur.
 
 - **BR-1 — Yıllık izin hakkı.** Kıdem 1 yıldan az: 0 gün · 1–5 yıl (5 dahil): 14 gün · 6–14 yıl:
-  20 gün · 15 yıl ve üzeri: 26 gün (İş K. md. 53). — Kod: **sapıyor** (D2; D1 yalnızca yorum).
+  20 gün · 15 yıl ve üzeri: 26 gün (İş K. md. 53). — Kod: **uyuyor** (D1 yalnızca yorum).
 - **BR-2 — Kıdem.** İşe giriş yıldönümünde tamamlanan tam yıl sayılır. 29 Şubat'ta işe girenin
   yılı, artık olmayan yıllarda 28 Şubat'ta dolar. — Kod: **uyuyor** (spec 0002).
 - **BR-3 — İzin günü.** Başlangıç ve bitiş dahil aralıktaki Pazartesi–Cuma günleri sayılır;
@@ -63,12 +63,12 @@ mimariye uymaması ayrıca kayıtlıdır: refactor spec'ine kadar beklenen durum
 Bootstrap incelemesinde (2026-10-25) bulunan, koddaki bilinen sapmalar. Kapanan sapma, onu
 düzelten işin spec'ine / raporuna referansla buradan silinir.
 Kapananlar: **D3, D4** — spec 0002 (kıdem yıldönümü ve iş günü sayımı) · **D5, D10, D11** —
-spec 0003 (bekleyen düşümü, izin yılı ve devir) · **D9'un stored XSS kısmı** — `fix/D9-reason-xss`.
+spec 0003 (bekleyen düşümü, izin yılı ve devir) · **D9'un stored XSS kısmı** — `fix/D9-reason-xss` · **D2** —
+`fix/D2-entitlement-15-years`.
 
 | # | Yer (aksi yazılmadıkça `app.py`) | Gözlem | Kural |
 |---|---|---|---|
 | D1 | `get_entitlement` (yorum), `annual_entitlement` (`leavemanager/domain/leave_rules.py`) | Yorum "1–5 yıl 15 gün" diyor, kod 14 döndürüyor (kod doğru, yorum yanlış). | BR-1 |
-| D2 | `annual_entitlement` (`leavemanager/domain/leave_rules.py`) | Tam 15 yıl kıdeme 20 gün veriyor; kural 26. Birikime de girer: 15. yılı geçen personelin Devir'i kalıcı olarak 6 gün eksik (Ayşe 322, doğrusu 328). | BR-1 |
 | D6 | `create_request` ↔ `/new` | Route `< days`, servis `<= days` kontrol ediyor; eşitlikte talep sessizce kaydedilmiyor. | BR-5 |
 | D7 | `create_request`, `/new` | Olmayan personel ve her istisna "başarılı" sayılıyor; bitiş < başlangıç kontrolü yok; böyle bir talep ve yalnızca hafta sonunu kapsayan talep 0 günle kaydediliyor. | BR-6 |
 | D8 | `create_request` | Geçmiş tarihli talep herkese açık. | BR-7 |
