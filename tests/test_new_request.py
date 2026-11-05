@@ -108,7 +108,7 @@ def test_d9_insufficient_balance_shows_internal_error_text(
     """PB-10 — bilinen sapma D9 (docs/domain.md, docs/security.md): hata mesajı dahili kod ve
     dahili telefon numarası içerir.
 
-    Bugünkü davranışı sabitler; D9 düzeltmesi bu testi bilinçli olarak değiştirir.
+    Bugünkü davranışı, HTTP 200 dahil, sabitler; D9 düzeltmesi bu testi bilinçli olarak değiştirir.
     """
     form = {"employee_id": employee_id, "start": start, "end": end, "reason": "x"}
     response = client.post("/new", data=form)
