@@ -150,7 +150,7 @@ def read_employee_id(value):
 
 def read_date(value):
     try:
-        return datetime.strptime(value or "", "%Y-%m-%d").date()
+        return date.fromisoformat(value or "")
     except ValueError:
         raise InvalidDate from None
 
