@@ -37,7 +37,7 @@ def assert_rejected(client: FlaskClient, form: dict[str, str], message: str) -> 
     response = client.post("/new", data=form)
     assert response.status_code == 400
     page = parse(response.text)
-    assert message in page.text
+    assert page.text.endswith(f"Yeni Talep {message}")  # gezinmeden sonra yalnızca mesaj
     assert page.fields == []
     assert list_text(client) == before
 
