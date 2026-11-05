@@ -118,6 +118,7 @@ def test_br2_seniority_completes_on_hire_anniversary(
         (date(2021, 2, 28), 14),
         (date(2026, 2, 27), 14),  # kıdem 5
         (date(2026, 2, 28), 20),  # kıdem 6
+        # Hak 26 → 26: bu sınırı ayırt etmez, kanıtı test_br4_carry_over_feb29_anniversary.
         (date(2036, 2, 29), 26),  # artık yıl: 16. yıl 29 Şubat'ta dolar
     ],
 )
