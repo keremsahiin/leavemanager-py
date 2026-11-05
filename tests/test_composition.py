@@ -33,13 +33,14 @@ def test_security_stored_html_is_escaped_on_output() -> None:
 @pytest.mark.parametrize(
     ("moment", "today"),
     [
-        (datetime(2026, 10, 24, 20, 59, 59, tzinfo=UTC), date(2026, 10, 24)),  # İstanbul 23:59:59
-        (datetime(2026, 10, 24, 21, 0, 0, tzinfo=UTC), date(2026, 10, 25)),  # İstanbul 00:00:00
+        (datetime(2026, 1, 14, 20, 59, 59, tzinfo=UTC), date(2026, 1, 14)),  # İstanbul 23:59:59
+        (datetime(2026, 1, 14, 21, 0, 0, tzinfo=UTC), date(2026, 1, 15)),  # İstanbul 00:00:00
     ],
     ids=["before-midnight", "after-midnight"],
 )
 def test_today_follows_istanbul_calendar_day(moment: datetime, today: date) -> None:
-    """docs/conventions.md, Data rules — "bugün" Europe/Istanbul takvim günüdür."""
+    """docs/conventions.md, Data rules — "bugün" Europe/Istanbul takvim günüdür. Tarih kışta: yaz
+    saati kullanan komşu bölgeler o zaman UTC+2 olduğu için İstanbul'dan ayrılır."""
     with time_machine.travel(moment, tick=False):
         assert clock.today() == today
 
