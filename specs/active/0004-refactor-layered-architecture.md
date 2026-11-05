@@ -33,7 +33,7 @@ Kanıt, baseline'ın 92 testi ve eski ile yeni kodun çıktı karşılaştırmas
 
 ## Out of scope
 - D13 (durum kayıtta Türkçe metin) ve PB-5'teki diğer sapmaların düzeltmesi.
-- `debug=True`: D9'un parçası, `app.py`'de `# noqa: S201` ile kalır (plan R3).
+- `debug=True`: D9'un parçası, `app.py`'de D9 notuyla kalır (plan R3, A1).
 - Kalıcı veri, giriş, roller, onay ekranı.
 
 ## Constraints
