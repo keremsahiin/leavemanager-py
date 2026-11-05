@@ -61,7 +61,7 @@ def test_balance_table_with_seed_data(client: FlaskClient) -> None:
 def test_br1_entitlement_by_seniority(
     client_on: Callable[[date], FlaskClient], today: date, entitlement: int
 ) -> None:
-    """BR-1 — sapmanın görünmediği noktalar: hak tablosu sınırları (0001/PB-3)."""
+    """BR-1 — hak tablosu sınırları (0001/PB-3)."""
     assert balances(client_on(today))[AYSE][0] == entitlement
 
 
