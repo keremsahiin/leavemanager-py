@@ -8,7 +8,13 @@ from datetime import date
 
 import pytest
 
-from leavemanager.domain.leave_rules import LeaveBalance, leave_balance, working_days
+from leavemanager.domain.errors import InvalidDateRange, NoLeaveDays
+from leavemanager.domain.leave_rules import (
+    LeaveBalance,
+    leave_balance,
+    validate_request,
+    working_days,
+)
 
 HIRE = date(2020, 3, 15)
 ANNIVERSARY = date(2026, 3, 15)  # kıdem 6: Hak 20, önceki yılların hakkı toplam 70
@@ -81,3 +87,19 @@ def test_br3_range_without_weekday_counts_zero(start: date, end: date) -> None:
     """BR-3 — aralıkta Pazartesi–Cuma yoksa izin günü 0. Böyle bir talep kaydedilmediği için
     (BR-6) sayı HTTP'den görülemez."""
     assert working_days(start, end) == 0
+
+
+@pytest.mark.parametrize(
+    ("start", "end", "error"),
+    [
+        (date(2026, 11, 10), date(2026, 11, 5), InvalidDateRange),
+        (date(2026, 11, 14), date(2026, 11, 15), NoLeaveDays),
+    ],
+    ids=["reversed", "weekend-only"],
+)
+def test_br6_validity_is_checked_before_balance(
+    start: date, end: date, error: type[Exception]
+) -> None:
+    """BR-6 önce gelir: Kalan negatif olsa bile kullanıcı bakiye değil gerçek hatayı görür."""
+    with pytest.raises(error):
+        validate_request(start, end, remaining=-1)
