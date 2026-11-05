@@ -23,19 +23,12 @@ select = ["E", "W", "F", "I", "B", "UP", "S", "TID"]
 [tool.ruff.lint.per-file-ignores]
 "leavemanager/clock.py" = ["TID251"]  # F6'nın tek istisnası
 "tests/**" = ["S101"]                 # pytest assert ile çalışır
-# GEÇİCİ: eski app.py yalnızca temel kurallara tabi; katmanlı pakete taşıyan refactor spec'i bu
-# satırı ve aşağıdaki format istisnasını kaldırır (bootstrap spec'siz kod değiştirmez).
-"app.py" = ["E501", "I", "B", "UP", "S", "TID"]
-
-[tool.ruff.format]
-exclude = ["app.py"]  # GEÇİCİ: yukarıdaki app.py notuna bakın
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["."]  # testler uygulamayı kökten import eder (tests/conftest.py)
 
-# Katman kuralları F1–F5 (docs/architecture.md). leavemanager/ paketi spec 0002 ile başladı;
-# lint-imports adımı check.conf'a taşımayı tamamlayan refactor spec'iyle eklenir.
+# Katman kuralları F1–F5 (docs/architecture.md); scripts/check.conf'taki imports adımı denetler.
 [tool.importlinter]
 root_package = "leavemanager"
 include_external_packages = true
