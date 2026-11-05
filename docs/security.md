@@ -22,7 +22,8 @@ Her plan ve review bu tabana uyar. Bugünkü koddaki açıklar bilinen sapma **D
 - Girdi doğrulaması sınırda (`web`) tip dönüşümüyle, iş kuralı doğrulaması `domain`'de yapılır;
   geçersiz girdi kullanıcıya anlaşılır hata olarak döner (`docs/conventions.md`, Error handling).
 - Kullanıcıya traceback, dahili hata kodu, sunucu/kişi bilgisi gösterilmez.
-- `debug=True` kodda **yasak** (Werkzeug debugger = uzaktan kod çalıştırma; ruff `S201`).
+- `debug=True` kodda **yasak** (Werkzeug debugger = uzaktan kod çalıştırma). Ruff `S201` uygulama
+  `create_app` ile kurulduğunda bunu görmez: review'da kontrol edilir. Bugün `app.py`'de duruyor (D9).
   Debug yalnızca yerelde `FLASK_DEBUG=1` ortam değişkeniyle açılır.
 - Log'a kişisel veri ve neden metni yazılmaz; log'larda yalnızca kayıt ID'leri bulunur.
 

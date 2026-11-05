@@ -7,4 +7,4 @@ from leavemanager.web import create_app
 app = create_app(LeaveService(InMemoryRepository()))
 
 if __name__ == "__main__":
-    app.run(port=5000, debug=True)  # noqa: S201 — bilinen sapma D9
+    app.run(port=5000, debug=True)  # bilinen sapma D9 (docs/domain.md)

@@ -10,8 +10,8 @@ include = ["*.py", "*.pyi"]
 
 [tool.ruff.lint]
 # E/W/F: temel hatalar · I: import sırası · B: olası buglar · UP: güncel Python sözdizimi
-# S: güvenlik (bandit) · TID: yasaklı API (F6)
-select = ["E", "W", "F", "I", "B", "UP", "S", "TID"]
+# S: güvenlik (bandit) · TID: yasaklı API (F6) · RUF100: hiçbir şeyi bastırmayan noqa
+select = ["E", "W", "F", "I", "B", "UP", "S", "TID", "RUF100"]
 
 [tool.ruff.lint.flake8-tidy-imports.banned-api]
 # F6 (docs/architecture.md): "bugün" yalnızca leavemanager/clock.py'den alınır.

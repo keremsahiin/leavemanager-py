@@ -60,8 +60,9 @@ Buradaki her kural ya araçla denetlenir (tercih edilen) ya da review'da kontrol
 ## Enforced by tooling
 `./scripts/check` içinde (`scripts/check.conf`), ayarlar `pyproject.toml`'da:
 - **ruff check** — `E`, `W`, `F` (temel hatalar), `I` (import sırası), `B` (olası buglar), `UP`
-  (güncel sözdizimi), `S` (güvenlik, ör. `debug=True` → S201), `TID251` (F6: "bugün" yalnızca
-  `clock.py`). Satır uzunluğu 100.
+  (güncel sözdizimi), `S` (güvenlik), `TID251` (F6: "bugün" yalnızca `clock.py`), `RUF100`
+  (hiçbir şeyi bastırmayan `noqa`). Satır uzunluğu 100. `S201` (`debug=True`) yalnızca `Flask(...)`
+  ile kurulan uygulamayı görür; `create_app` üzerinden açılan debug review'da kontrol edilir.
 - **ruff format --check** — biçim tartışması review'da yapılmaz; formatlayıcı karar verir.
   Yalnızca `*.py` / `*.pyi` dosyalarına bakılır.
 - **lint-imports** (import-linter) — katman kuralları F1–F5 (`docs/architecture.md`).
