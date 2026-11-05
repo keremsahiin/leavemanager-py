@@ -64,7 +64,7 @@ düzelten işin spec'ine / raporuna referansla buradan silinir.
 Kapananlar: **D3, D4** — spec 0002 (kıdem yıldönümü ve iş günü sayımı) · **D5, D10, D11** —
 spec 0003 (bekleyen düşümü, izin yılı ve devir) · **D9'un stored XSS kısmı** — `fix/D9-reason-xss` · **D2** —
 `fix/D2-entitlement-15-years` · **D6, D7** — `fix/D6-D7-request-validation` · **D1** — spec 0004
-(yorum kalktı) · **D9'un `body\|safe` kısmı** — spec 0004 (HTML şablon dosyalarından;
+(yorum kalktı) · **D9'un `body|safe` kısmı** — spec 0004 (HTML şablon dosyalarından;
 `test_security_stored_html_is_escaped_on_output`).
 
 | # | Yer | Gözlem | Kural |
