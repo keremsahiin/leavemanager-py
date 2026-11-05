@@ -5,6 +5,8 @@ from collections.abc import Sequence
 from dataclasses import dataclass
 from datetime import date
 
+from leavemanager.domain.errors import InsufficientBalance, InvalidDateRange, NoLeaveDays
+
 
 @dataclass(frozen=True)
 class LeaveBalance:
@@ -90,3 +92,14 @@ def working_days(start: date, end: date) -> int:
     weeks, rest = divmod(days, 7)
     first = start.weekday()
     return weeks * 5 + sum(1 for offset in range(rest) if (first + offset) % 7 < 5)
+
+
+def validate_request(start: date, end: date, remaining: int) -> None:
+    """BR-5 ve BR-6 — kurala uymayan talepte `DomainError` fırlatır; Kalan'a eşit talep geçerli."""
+    if end < start:
+        raise InvalidDateRange
+    days = working_days(start, end)
+    if days < 1:
+        raise NoLeaveDays
+    if days > remaining:
+        raise InsufficientBalance

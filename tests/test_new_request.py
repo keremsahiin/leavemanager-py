@@ -10,6 +10,10 @@ from flask.testing import FlaskClient
 from pages import counter, parse
 
 ERROR_TEXT = "HATA: ERR-412 NullReferenceGibi - bakiye yetersiz. IT'ye bildirin: dahili 4127"
+EMPLOYEE_ERROR = "Personel bulunamadı."
+DATE_ERROR = "Başlangıç ve bitiş tarihi geçerli olmalı."
+RANGE_ERROR = "Bitiş tarihi başlangıç tarihinden önce olamaz."
+NO_LEAVE_DAY_ERROR = "Seçilen aralıkta izin günü yok."
 SEED_REQUEST_COUNT = 8
 
 
@@ -25,6 +29,17 @@ def list_text(client: FlaskClient) -> str:
 def assert_redirects_to_list(response) -> None:
     assert response.status_code == 302
     assert response.headers["Location"] == "/requests"
+
+
+def assert_rejected(client: FlaskClient, form: dict[str, str], message: str) -> None:
+    """BR-6: kayıt oluşmaz, kullanıcı hatayı görür."""
+    before = list_text(client)
+    response = client.post("/new", data=form)
+    assert response.status_code == 400
+    page = parse(response.text)
+    assert page.text.endswith(f"Yeni Talep {message}")  # gezinmeden sonra yalnızca mesaj
+    assert page.fields == []
+    assert list_text(client) == before
 
 
 def test_form_offers_five_employees_and_fields(client: FlaskClient) -> None:
@@ -93,7 +108,7 @@ def test_d9_insufficient_balance_shows_internal_error_text(
     """PB-10 — bilinen sapma D9 (docs/domain.md, docs/security.md): hata mesajı dahili kod ve
     dahili telefon numarası içerir.
 
-    Bugünkü davranışı sabitler; D9 düzeltmesi bu testi bilinçli olarak değiştirir.
+    Bugünkü davranışı, HTTP 200 dahil, sabitler; D9 düzeltmesi bu testi bilinçli olarak değiştirir.
     """
     form = {"employee_id": employee_id, "start": start, "end": end, "reason": "x"}
     response = client.post("/new", data=form)
@@ -102,19 +117,13 @@ def test_d9_insufficient_balance_shows_internal_error_text(
     assert len(request_rows(client)) == SEED_REQUEST_COUNT
 
 
-def test_d6_equal_to_remaining_is_silently_dropped(client: FlaskClient) -> None:
-    """PB-11 — bilinen sapma D6 (docs/domain.md): talep günü Kalan'a eşitse (Zeynep, 13 iş
-    günü) kayıt oluşmaz ve hata gösterilmez (BR-5: kabul edilmeli).
-
-    Bugünkü davranışı sabitler; D6 düzeltmesi bu testi bilinçli olarak değiştirir. "Hata
-    gösterilmez": yönlendirilen liste sayfası POST'tan önceki haliyle aynıdır — ne yeni kayıt
-    ne mesaj (VERIFY G1).
-    """
-    before = list_text(client)
+def test_br5_equal_to_remaining_is_accepted(client: FlaskClient) -> None:
+    """BR-5 (D6 düzeltmesi) — talep günü Kalan'a eşitse (Zeynep, 13 iş günü) kabul edilir."""
     form = {"employee_id": "3", "start": "2026-12-01", "end": "2026-12-17", "reason": "Esit"}
     assert_redirects_to_list(client.post("/new", data=form))
-    assert list_text(client) == before
-    assert len(request_rows(client)) == SEED_REQUEST_COUNT
+    rows = request_rows(client)
+    assert len(rows) == SEED_REQUEST_COUNT + 1
+    assert rows[-1][:4] == ["Zeynep Kaya", "2026-12-01", "2026-12-17", "13"]
 
 
 def test_one_below_remaining_is_saved(client: FlaskClient) -> None:
@@ -136,64 +145,58 @@ def test_br3_balance_check_counts_weekdays(client: FlaskClient) -> None:
     assert rows[-1][:4] == ["Zeynep Kaya", "2026-12-01", "2026-12-15", "11"]
 
 
-def test_d7_end_before_start_saved_with_zero_days(client: FlaskClient) -> None:
-    """PB-12 — bilinen sapma D7 (docs/domain.md): bitiş başlangıçtan önceyse talep kaydedilir
-    (BR-6: reddedilmeli); aralıkta gün olmadığı için Gün 0 (spec 0002 CB-2).
-
-    Bugünkü davranışı sabitler; D7 düzeltmesi bu testi bilinçli olarak değiştirir.
-    """
+def test_br6_end_before_start_is_rejected(client: FlaskClient) -> None:
+    """BR-6 (D7 düzeltmesi) — bitiş başlangıçtan önce olamaz."""
     form = {"employee_id": "2", "start": "2026-11-10", "end": "2026-11-05", "reason": "Ters"}
-    assert_redirects_to_list(client.post("/new", data=form))
-    assert request_rows(client)[-1] == [
-        "Mehmet Demir",
-        "2026-11-10",
-        "2026-11-05",
-        "0",
-        "Ters",
-        "Beklemede",
-    ]
+    assert_rejected(client, form, RANGE_ERROR)
 
 
-def test_d7_weekend_only_request_saved_with_zero_days(client: FlaskClient) -> None:
-    """Spec 0002 PB-4 — bilinen sapma D7 (docs/domain.md): yalnızca hafta sonunu kapsayan
-    talep 0 günle kaydedilir (BR-6: izin günü en az 1 olmalı).
-
-    Bugünkü davranışı sabitler; D7 düzeltmesi bu testi bilinçli olarak değiştirir.
-    """
-    form = {"employee_id": "2", "start": "2026-11-14", "end": "2026-11-15", "reason": "Haftasonu"}
-    assert_redirects_to_list(client.post("/new", data=form))
-    assert request_rows(client)[-1] == [
-        "Mehmet Demir",
-        "2026-11-14",
-        "2026-11-15",
-        "0",
-        "Haftasonu",
-        "Beklemede",
-    ]
+@pytest.mark.parametrize("employee_id", ["2", "5"], ids=["balance-left", "no-balance"])
+def test_br6_request_without_leave_day_is_rejected(client: FlaskClient, employee_id: str) -> None:
+    """BR-6 (D7 düzeltmesi) — izin günü en az 1 olmalı: yalnızca hafta sonunu kapsayan talep."""
+    form = {"employee_id": employee_id, "start": "2026-11-14", "end": "2026-11-15"}
+    assert_rejected(client, form, NO_LEAVE_DAY_ERROR)
 
 
 @pytest.mark.parametrize(
-    "form",
+    ("form", "message"),
     [
-        {"employee_id": "99", "start": "2026-11-10", "end": "2026-11-11", "reason": "Yok"},
-        {"employee_id": "2", "start": "abc", "end": "2026-11-11", "reason": "Bozuk"},
-        {"start": "2026-11-10", "end": "2026-11-11"},
-        {"employee_id": "2", "start": "2026-11-10"},
-        {},
+        ({"employee_id": "99", "start": "2026-11-10", "end": "2026-11-11"}, EMPLOYEE_ERROR),
+        ({"employee_id": "abc", "start": "2026-11-10", "end": "2026-11-11"}, EMPLOYEE_ERROR),
+        ({"start": "2026-11-10", "end": "2026-11-11"}, EMPLOYEE_ERROR),
+        ({}, EMPLOYEE_ERROR),
+        ({"employee_id": "2", "start": "abc", "end": "2026-11-11"}, DATE_ERROR),
+        ({"employee_id": "2", "start": "2026-11-10", "end": "2026-13-40"}, DATE_ERROR),
+        ({"employee_id": "2", "start": "2026-1-5", "end": "2026-11-11"}, DATE_ERROR),
+        ({"employee_id": "2", "end": "2026-11-11"}, DATE_ERROR),
+        ({"employee_id": "2", "start": "2026-11-10"}, DATE_ERROR),
     ],
-    ids=["unknown-employee", "invalid-date", "missing-employee", "missing-end", "empty-form"],
+    ids=[
+        "unknown-employee",
+        "non-numeric-employee",
+        "missing-employee",
+        "empty-form",
+        "invalid-start",
+        "invalid-end",
+        "non-iso-date",
+        "missing-start",
+        "missing-end",
+    ],
 )
-def test_d7_invalid_input_silently_redirects(client: FlaskClient, form: dict[str, str]) -> None:
-    """PB-13 — bilinen sapma D7 (docs/domain.md): geçersiz girdi kayıt oluşturmaz ama hata da
-    göstermez; kullanıcı talep listesine yönlendirilir (BR-6: hata gösterilmeli).
+def test_br6_invalid_input_shows_error(
+    client: FlaskClient, form: dict[str, str], message: str
+) -> None:
+    """BR-6 (D7 düzeltmesi) — personel mevcut olmalı; geçersiz girdi hata olarak döner."""
+    assert_rejected(client, form, message)
 
-    Bugünkü davranışı sabitler; D7 düzeltmesi bu testi bilinçli olarak değiştirir. "Hata
-    göstermez": yönlendirilen liste sayfası POST'tan önceki haliyle aynıdır (VERIFY G1).
-    """
-    before = list_text(client)
-    assert_redirects_to_list(client.post("/new", data=form))
-    assert list_text(client) == before
-    assert len(request_rows(client)) == SEED_REQUEST_COUNT
+
+@pytest.mark.parametrize("field", ["employee_id", "start", "end"])
+def test_security_error_page_does_not_echo_input(client: FlaskClient, field: str) -> None:
+    """docs/security.md, Input & output — hata sayfası girilen değeri geri yansıtmaz."""
+    form = {"employee_id": "2", "start": "2026-11-10", "end": "2026-11-11"}
+    response = client.post("/new", data={**form, field: "<script>alert(1)</script>"})
+    assert response.status_code == 400
+    assert "alert(1)" not in response.text
 
 
 def test_d8_past_dated_request_accepted(client: FlaskClient) -> None:

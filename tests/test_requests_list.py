@@ -33,8 +33,8 @@ def test_lists_seed_requests_in_order(client: FlaskClient) -> None:
 
 def test_br3_counts_weekdays_only(client: FlaskClient) -> None:
     """BR-3, spec 0002 CB-2 — izin günü, başlangıç ve bitiş dahil Pazartesi–Cuma günleridir:
-    Cuma 2026-11-13 → Pazartesi 2026-11-16 talebi 2 gün. Yalnızca hafta sonu = 0 örneği D7'ye
-    bağlı olduğu için `test_new_request.py::test_d7_weekend_only_…`'de (plan 0002, A2)."""
+    Cuma 2026-11-13 → Pazartesi 2026-11-16 talebi 2 gün. Yalnızca hafta sonu = 0 örneği
+    `test_leave_rules.py::test_br3_range_without_weekday_counts_zero`'da."""
     form = {"employee_id": "2", "start": "2026-11-13", "end": "2026-11-16", "reason": "Hafta sonu"}
     client.post("/new", data=form)
     last = parse(client.get("/requests").text).rows[-1]

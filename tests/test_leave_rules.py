@@ -1,4 +1,4 @@
-"""Bakiye hesabının izin yılı sınırları — spec 0003 CB-1 (review F1).
+"""İzin kurallarının HTTP'den görülemeyen sınırları — spec 0003 CB-1 (review F1), BR-3.
 
 HTTP'de onay yolu yok ve seed'de tek onaylı talep var; bu sınırlar ancak `leave_balance` doğrudan
 çağrılarak sınanır. Saf fonksiyon olduğu için "bugün" parametre olarak verilir, saat dondurulmaz.
@@ -8,7 +8,13 @@ from datetime import date
 
 import pytest
 
-from leavemanager.domain.leave_rules import LeaveBalance, leave_balance
+from leavemanager.domain.errors import InvalidDateRange, NoLeaveDays
+from leavemanager.domain.leave_rules import (
+    LeaveBalance,
+    leave_balance,
+    validate_request,
+    working_days,
+)
 
 HIRE = date(2020, 3, 15)
 ANNIVERSARY = date(2026, 3, 15)  # kıdem 6: Hak 20, önceki yılların hakkı toplam 70
@@ -67,3 +73,33 @@ def test_br4_feb29_hire_leave_year_boundary(today: date, carried_over: int, used
     """BR-2 ve BR-4 — 29 Şubat'ta işe girenin izin yılı artık yılda 29 Şubat'ta başlar."""
     balance = leave_balance(date(2020, 2, 29), today, [(date(2024, 2, 28), 5)], 0)
     assert (balance.carried_over, balance.used) == (carried_over, used)
+
+
+@pytest.mark.parametrize(
+    ("start", "end"),
+    [
+        (date(2026, 11, 14), date(2026, 11, 15)),  # yalnızca hafta sonu
+        (date(2026, 11, 10), date(2026, 11, 5)),  # bitiş başlangıçtan önce
+    ],
+    ids=["weekend-only", "reversed"],
+)
+def test_br3_range_without_weekday_counts_zero(start: date, end: date) -> None:
+    """BR-3 — aralıkta Pazartesi–Cuma yoksa izin günü 0. Böyle bir talep kaydedilmediği için
+    (BR-6) sayı HTTP'den görülemez."""
+    assert working_days(start, end) == 0
+
+
+@pytest.mark.parametrize(
+    ("start", "end", "error"),
+    [
+        (date(2026, 11, 10), date(2026, 11, 5), InvalidDateRange),
+        (date(2026, 11, 14), date(2026, 11, 15), NoLeaveDays),
+    ],
+    ids=["reversed", "weekend-only"],
+)
+def test_br6_validity_is_checked_before_balance(
+    start: date, end: date, error: type[Exception]
+) -> None:
+    """BR-6 önce gelir: Kalan negatif olsa bile kullanıcı bakiye değil gerçek hatayı görür."""
+    with pytest.raises(error):
+        validate_request(start, end, remaining=-1)
