@@ -44,9 +44,9 @@ mimariye uymaması ayrıca kayıtlıdır: refactor spec'ine kadar beklenen durum
   Kullanılmayan izin yanmaz, devir tavanı yoktur (md. 53: hakkından vazgeçilemez). Reddedilen
   talep bakiyeyi etkilemez. — Kod: **uyuyor** (spec 0003).
 - **BR-5 — Bakiye kontrolü.** Talebin izin günü kalan bakiyeye eşit veya azsa talep kabul edilir.
-  Kontrol yalnızca servis katmanında yapılır. — Kod: **sapıyor** (D6).
+  Kontrol yalnızca servis katmanında yapılır. — Kod: **uyuyor**.
 - **BR-6 — Geçerlilik.** Bitiş başlangıçtan önce olamaz; izin günü en az 1 olmalı; personel
-  mevcut olmalı. İhlalde kayıt oluşmaz, kullanıcıya hata gösterilir. — Kod: **sapıyor** (D7).
+  mevcut olmalı. İhlalde kayıt oluşmaz, kullanıcıya hata gösterilir. — Kod: **uyuyor**.
 - **BR-7 — Geçmiş tarih.** Başlangıcı bugünden önce olan talebi yalnızca İK girebilir.
   — Kod: **sapıyor** (D8; rol yok, herkese açık).
 - **BR-8 — Durum geçişi.** Yalnızca Yönetici veya İK, `pending` bir talebi `approved` ya da
@@ -64,13 +64,11 @@ Bootstrap incelemesinde (2026-10-25) bulunan, koddaki bilinen sapmalar. Kapanan 
 düzelten işin spec'ine / raporuna referansla buradan silinir.
 Kapananlar: **D3, D4** — spec 0002 (kıdem yıldönümü ve iş günü sayımı) · **D5, D10, D11** —
 spec 0003 (bekleyen düşümü, izin yılı ve devir) · **D9'un stored XSS kısmı** — `fix/D9-reason-xss` · **D2** —
-`fix/D2-entitlement-15-years`.
+`fix/D2-entitlement-15-years` · **D6, D7** — `fix/D6-D7-request-validation`.
 
 | # | Yer (aksi yazılmadıkça `app.py`) | Gözlem | Kural |
 |---|---|---|---|
 | D1 | `get_entitlement` (yorum), `annual_entitlement` (`leavemanager/domain/leave_rules.py`) | Yorum "1–5 yıl 15 gün" diyor, kod 14 döndürüyor (kod doğru, yorum yanlış). | BR-1 |
-| D6 | `create_request` ↔ `/new` | Route `< days`, servis `<= days` kontrol ediyor; eşitlikte talep sessizce kaydedilmiyor. | BR-5 |
-| D7 | `create_request`, `/new` | Olmayan personel ve her istisna "başarılı" sayılıyor; bitiş < başlangıç kontrolü yok; böyle bir talep ve yalnızca hafta sonunu kapsayan talep 0 günle kaydediliyor. | BR-6 |
 | D8 | `create_request` | Geçmiş tarihli talep herkese açık. | BR-7 |
 | D9 | genel | Güvenlik açıkları: kimlik doğrulama yok, CSRF yok, `debug=True`, hata mesajında dahili kod ve telefon. HTML hâlâ metin birleştirmeyle ve `body\|safe` ile üretiliyor: sayfaya yazılan kullanıcıdan gelen her değer, seed'den kullanıcı girdisine geçen alanlar (ad, birim) dahil, kayıtta değil çıktıda elle kaçışlanmalı. Refactor bunu kaldırırken doğrudan kayda yazılan ham HTML'in sayfada kaçışlandığını da test etmeli. Ayrıntı: `docs/security.md`. | — |
 | D12 | `/requests`, `/new` | Neden alanı herkese görünüyor, uyarı yok. | BR-9 |

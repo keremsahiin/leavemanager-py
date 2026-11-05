@@ -5,7 +5,8 @@
 from flask import Flask, request, redirect, render_template_string
 from datetime import datetime, date
 from html import escape
-from leavemanager.domain.leave_rules import annual_entitlement, completed_years, leave_balance, working_days
+from leavemanager.domain.errors import DomainError, EmployeeNotFound, InsufficientBalance, InvalidDate, InvalidDateRange, NoLeaveDays
+from leavemanager.domain.leave_rules import annual_entitlement, completed_years, leave_balance, validate_request, working_days
 
 app = Flask(__name__)
 
@@ -73,26 +74,18 @@ class LeaveService:
         return self.get_balance(emp).remaining
 
     def create_request(self, emp_id, start, end, reason):
-        try:
-            emp = None
-            for e in Db.employees:
-                if e["id"] == emp_id:
-                    emp = e
-            if emp is None:
-                return True  # olmayan personel? formdan gelmez zaten
-            days = self.calc_days(start, end)
-            # bakiye kontrolu (route'ta da var ama burada da dursun, saglamcilik)
-            if self.get_remaining(emp) <= days:
-                return False
-            if start < datetime.now().date():
-                pass  # gecmis tarih... IK bazen geriye donuk giriyor, dokunma
-            Db.requests.append({"id": Db.next_id, "employee_id": emp_id, "start": start,
-                                "end": end, "reason": reason, "status": "Beklemede"})
-            Db.next_id += 1
-            return True
-        except Exception:
-            # loglanacak
-            return True
+        emp = None
+        for e in Db.employees:
+            if e["id"] == emp_id:
+                emp = e
+        if emp is None:
+            raise EmployeeNotFound
+        validate_request(start, end, self.get_remaining(emp))
+        if start < datetime.now().date():
+            pass  # gecmis tarih... IK bazen geriye donuk giriyor, dokunma
+        Db.requests.append({"id": Db.next_id, "employee_id": emp_id, "start": start,
+                            "end": end, "reason": reason, "status": "Beklemede"})
+        Db.next_id += 1
 
     def status_badge(self, status):
         # renkler: UI isi ama burada pratik oluyor
@@ -142,23 +135,38 @@ def list_requests():
     body += "</table>"
     return render_template_string(PAGE, body=body)
 
+ERROR_MESSAGES = {
+    EmployeeNotFound: "Personel bulunamadı.",
+    InvalidDate: "Başlangıç ve bitiş tarihi geçerli olmalı.",
+    InvalidDateRange: "Bitiş tarihi başlangıç tarihinden önce olamaz.",
+    NoLeaveDays: "Seçilen aralıkta izin günü yok.",
+}
+
+def read_employee_id(value):
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        raise EmployeeNotFound from None
+
+def read_date(value):
+    try:
+        return datetime.strptime(value or "", "%Y-%m-%d").date()
+    except ValueError:
+        raise InvalidDate from None
+
 @app.route("/new", methods=["GET", "POST"])
 def new_request():
     if request.method == "POST":
         try:
-            emp_id = int(request.form["employee_id"])
-            start = datetime.strptime(request.form["start"], "%Y-%m-%d").date()
-            end = datetime.strptime(request.form["end"], "%Y-%m-%d").date()
-            emp = [e for e in Db.employees if e["id"] == emp_id][0]
-            days = svc.calc_days(start, end)
-            # bakiye kontrolu (serviste de var ama formda erken uyari iyi oluyor)
-            if svc.get_remaining(emp) < days:
-                return render_template_string(PAGE, body="<p style='color:red'>HATA: ERR-412 NullReferenceGibi - bakiye yetersiz. IT'ye bildirin: dahili 4127</p>")
+            emp_id = read_employee_id(request.form.get("employee_id"))
+            start = read_date(request.form.get("start"))
+            end = read_date(request.form.get("end"))
             svc.create_request(emp_id, start, end, request.form.get("reason", ""))
-            return redirect("/requests")
-        except Exception:
-            # loglanacak
-            return redirect("/requests")
+        except InsufficientBalance:
+            return render_template_string(PAGE, body="<p style='color:red'>HATA: ERR-412 NullReferenceGibi - bakiye yetersiz. IT'ye bildirin: dahili 4127</p>")
+        except DomainError as error:
+            return render_template_string(PAGE, body="<p style='color:red'>%s</p>" % ERROR_MESSAGES[type(error)]), 400
+        return redirect("/requests")
     options = "".join("<option value='%d'>%s</option>" % (e["id"], e["name"]) for e in Db.employees)
     body = """<h3>Yeni Talep</h3><form method="post">
     Personel: <select name="employee_id">%s</select><br><br>

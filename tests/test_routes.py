@@ -43,6 +43,7 @@ def test_every_page_has_navigation(client: FlaskClient) -> None:
         "/requests": client.get("/requests").text,
         "/new": client.get("/new").text,
         "hata sayfası": client.post("/new", data=error_form).text,
+        "geçersiz girdi sayfası": client.post("/new", data={}).text,
     }
     for name, html in pages.items():
         assert NAVIGATION <= set(parse(html).links), name
