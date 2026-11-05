@@ -36,7 +36,9 @@ def assert_rejected(client: FlaskClient, form: dict[str, str], message: str) -> 
     before = list_text(client)
     response = client.post("/new", data=form)
     assert response.status_code == 400
-    assert message in parse(response.text).text
+    page = parse(response.text)
+    assert message in page.text
+    assert page.fields == []
     assert list_text(client) == before
 
 
@@ -184,6 +186,15 @@ def test_br6_invalid_input_shows_error(
 ) -> None:
     """BR-6 (D7 düzeltmesi) — personel mevcut olmalı; geçersiz girdi hata olarak döner."""
     assert_rejected(client, form, message)
+
+
+@pytest.mark.parametrize("field", ["employee_id", "start", "end"])
+def test_security_error_page_does_not_echo_input(client: FlaskClient, field: str) -> None:
+    """docs/security.md, Input & output — hata sayfası girilen değeri geri yansıtmaz."""
+    form = {"employee_id": "2", "start": "2026-11-10", "end": "2026-11-11"}
+    response = client.post("/new", data={**form, field: "<script>alert(1)</script>"})
+    assert response.status_code == 400
+    assert "alert(1)" not in response.text
 
 
 def test_d8_past_dated_request_accepted(client: FlaskClient) -> None:
