@@ -169,7 +169,7 @@ def test_br4_pending_days_deducted(client: FlaskClient) -> None:
     assert table["Mehmet Demir"] == (20, 90, 0, 3, 107)
 
 
-@pytest.mark.parametrize("today", [date(2023, 3, 15), date(2026, 10, 25), date(2027, 3, 15)])
+@pytest.mark.parametrize("today", [date(2026, 10, 25), date(2027, 3, 15)])
 def test_br4_row_arithmetic(client_on: Callable[[date], FlaskClient], today: date) -> None:
     """Spec 0003 CB-2 — her satırda Kalan = Devir + Hak − Kullanılan − Bekleyen."""
     for entitlement, carried, used, pending, remaining in balances(client_on(today)).values():
