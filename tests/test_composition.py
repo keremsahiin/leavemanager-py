@@ -6,10 +6,13 @@ Kayıttaki durum sabitleri (`STATUS_*`) D13'e bağlıdır; o düzeltme bu dosyay
 değiştirir.
 """
 
-from datetime import date
+from datetime import UTC, date, datetime
 
+import pytest
+import time_machine
 from pages import parse
 
+from leavemanager import clock
 from leavemanager.domain.models import STATUS_APPROVED, STATUS_PENDING
 from leavemanager.services import LeaveService
 from leavemanager.storage import InMemoryRepository
@@ -25,6 +28,20 @@ def test_security_stored_html_is_escaped_on_output() -> None:
     html = create_app(LeaveService(repository)).test_client().get("/requests").text
     assert raw_html not in html
     assert parse(html).rows[-1][4] == raw_html
+
+
+@pytest.mark.parametrize(
+    ("moment", "today"),
+    [
+        (datetime(2026, 10, 24, 20, 59, 59, tzinfo=UTC), date(2026, 10, 24)),  # İstanbul 23:59:59
+        (datetime(2026, 10, 24, 21, 0, 0, tzinfo=UTC), date(2026, 10, 25)),  # İstanbul 00:00:00
+    ],
+    ids=["before-midnight", "after-midnight"],
+)
+def test_today_follows_istanbul_calendar_day(moment: datetime, today: date) -> None:
+    """docs/conventions.md, Data rules — "bugün" Europe/Istanbul takvim günüdür."""
+    with time_machine.travel(moment, tick=False):
+        assert clock.today() == today
 
 
 def test_balance_rows_read_today_once() -> None:
