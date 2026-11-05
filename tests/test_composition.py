@@ -39,10 +39,10 @@ def test_balance_rows_read_today_once() -> None:
 
 def test_br4_request_start_decides_leave_year() -> None:
     """BR-4, spec 0003 R2-2 — yıldönümünü kapsayan onaylı talep başladığı izin yılına yazılır.
-    Mehmet'in (giriş 2019-06-01) 2026-05-29 → 2026-06-02 talebi 3 iş günü: önceki yılın devrinden
-    düşülür (90 − 3), bu yılın Kullanılan'ına girmez."""
+    Mehmet'in (giriş 2019-06-01) 2025-05-30 → 2025-06-03 talebi 3 iş günü (aralıkta resmî tatil
+    yok, D15'ten bağımsız): önceki yılın devrinden düşülür (70 − 3), Kullanılan'a girmez."""
     repository = InMemoryRepository()
-    repository.add_request(2, date(2026, 5, 29), date(2026, 6, 2), "Kapsayan", STATUS_APPROVED)
-    rows = LeaveService(repository, today=lambda: date(2026, 10, 25)).balance_rows()
+    repository.add_request(2, date(2025, 5, 30), date(2025, 6, 3), "Kapsayan", STATUS_APPROVED)
+    rows = LeaveService(repository, today=lambda: date(2025, 10, 25)).balance_rows()
     mehmet = next(row.balance for row in rows if row.employee.id == 2)
-    assert (mehmet.carried_over, mehmet.used) == (87, 0)
+    assert (mehmet.carried_over, mehmet.used) == (67, 0)
