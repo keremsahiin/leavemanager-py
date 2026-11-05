@@ -18,7 +18,7 @@ from leavemanager.domain.models import (
     STATUS_REJECTED,
     Employee,
 )
-from leavemanager.storage import InMemoryRepository
+from leavemanager.storage import LeaveRepository
 
 
 @dataclass(frozen=True)
@@ -46,7 +46,7 @@ class RequestRow:
 
 class LeaveService:
     def __init__(
-        self, repository: InMemoryRepository, today: Callable[[], date] = clock.today
+        self, repository: LeaveRepository, today: Callable[[], date] = clock.today
     ) -> None:
         self._repository = repository
         self._today = today
