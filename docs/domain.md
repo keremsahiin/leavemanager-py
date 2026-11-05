@@ -28,11 +28,10 @@ görüşmesinde kabul edildi; **İK / hukuk teyidi henüz yapılmadı** (bkz. Op
 Her kuralın yanında bugünkü kodun durumu var. "Sapıyor" = kayıtlı bir bilinen sapma (aşağıdaki
 tablo); uygulama canlıda olmadığı için her sapma bir **bug**'dır (`/fix-bug`), kural belirsizliği
 değil. Belge–kod çelişkisi yalnızca bu listede olmayan bir sapma için ramp gerektirir (R-10,
-`prompts/recovery/ambiguity.md`). Eski `app.py`'nin kod kurallarına (`docs/conventions.md`) ve
-mimariye uymaması ayrıca kayıtlıdır: refactor spec'ine kadar beklenen durumdur.
+`prompts/recovery/ambiguity.md`).
 
 - **BR-1 — Yıllık izin hakkı.** Kıdem 1 yıldan az: 0 gün · 1–5 yıl (5 dahil): 14 gün · 6–14 yıl:
-  20 gün · 15 yıl ve üzeri: 26 gün (İş K. md. 53). — Kod: **uyuyor** (D1 yalnızca yorum).
+  20 gün · 15 yıl ve üzeri: 26 gün (İş K. md. 53). — Kod: **uyuyor**.
 - **BR-2 — Kıdem.** İşe giriş yıldönümünde tamamlanan tam yıl sayılır. 29 Şubat'ta işe girenin
   yılı, artık olmayan yıllarda 28 Şubat'ta dolar. — Kod: **uyuyor** (spec 0002).
 - **BR-3 — İzin günü.** Başlangıç ve bitiş dahil aralıktaki Pazartesi–Cuma günleri sayılır;
@@ -64,15 +63,15 @@ Bootstrap incelemesinde (2026-10-25) bulunan, koddaki bilinen sapmalar. Kapanan 
 düzelten işin spec'ine / raporuna referansla buradan silinir.
 Kapananlar: **D3, D4** — spec 0002 (kıdem yıldönümü ve iş günü sayımı) · **D5, D10, D11** —
 spec 0003 (bekleyen düşümü, izin yılı ve devir) · **D9'un stored XSS kısmı** — `fix/D9-reason-xss` · **D2** —
-`fix/D2-entitlement-15-years` · **D6, D7** — `fix/D6-D7-request-validation`.
+`fix/D2-entitlement-15-years` · **D6, D7** — `fix/D6-D7-request-validation` · **D1** — spec 0004
+(yorum kalktı).
 
-| # | Yer (aksi yazılmadıkça `app.py`) | Gözlem | Kural |
+| # | Yer | Gözlem | Kural |
 |---|---|---|---|
-| D1 | `get_entitlement` (yorum), `annual_entitlement` (`leavemanager/domain/leave_rules.py`) | Yorum "1–5 yıl 15 gün" diyor, kod 14 döndürüyor (kod doğru, yorum yanlış). | BR-1 |
-| D8 | `create_request` | Geçmiş tarihli talep herkese açık. | BR-7 |
-| D9 | genel | Güvenlik açıkları: kimlik doğrulama yok, CSRF yok, `debug=True`, hata mesajında dahili kod ve telefon (yetersiz bakiye sayfası ayrıca HTTP 200 döner: düzeltme onu da 4xx yapıp `ERROR_MESSAGES`'a taşımalı). HTML hâlâ metin birleştirmeyle ve `body\|safe` ile üretiliyor: sayfaya yazılan kullanıcıdan gelen her değer, seed'den kullanıcı girdisine geçen alanlar (ad, birim) dahil, kayıtta değil çıktıda elle kaçışlanmalı. Refactor bunu kaldırırken doğrudan kayda yazılan ham HTML'in sayfada kaçışlandığını da test etmeli. Beklenmeyen hatada Flask'in İngilizce 500 sayfası çıkar, `debug=True` ile traceback de görünür: `debug=True` kalkarken Türkçe 500 sayfası eklenmeli (`docs/conventions.md`). Ayrıntı: `docs/security.md`. | — |
+| D8 | `LeaveService.create_request` | Geçmiş tarihli talep herkese açık. | BR-7 |
+| D9 | genel | Güvenlik açıkları: kimlik doğrulama yok, CSRF yok, `debug=True` (`app.py`), hata mesajında dahili kod ve telefon (`leavemanager/web/pages.py`; yetersiz bakiye sayfası ayrıca HTTP 200 döner: düzeltme onu da 4xx yapmalı). Beklenmeyen hatada Flask'in İngilizce 500 sayfası çıkar, `debug=True` ile traceback de görünür: `debug=True` kalkarken Türkçe 500 sayfası eklenmeli (`docs/conventions.md`). Ayrıntı: `docs/security.md`. | — |
 | D12 | `/requests`, `/new` | Neden alanı herkese görünüyor, uyarı yok. | BR-9 |
-| D13 | `seed`, `get_balance`, `status_badge`, `/` | Durum kayıtta Türkçe string (`"Onaylandi"` …) ve string literal ile karşılaştırılıyor (bir yerde `status.lower()`). Kural: kayıtta `pending`/`approved`/`rejected`, `LeaveStatus` enum'u. | `docs/conventions.md` Naming |
+| D13 | `leavemanager/domain/models.py`, `LeaveService`, `leavemanager/web/pages.py` | Durum kayıtta Türkçe metin (`"Onaylandi"` …). Kural: kayıtta `pending`/`approved`/`rejected`, `LeaveStatus` enum'u. | `docs/conventions.md` Naming |
 | D14 | `leave_balance` (`leavemanager/domain/leave_rules.py`) | Kalan = Devir + Hak − Kullanılan − Bekleyen, alt sınır yok: Kalan negatife düşebiliyor (ör. kıdem 0 iken onaylı talep varsa). Spec 0001 / plan 0001 R6'da bulundu. | I-1 |
 | D15 | `working_days` (`leavemanager/domain/leave_rules.py`) | Hafta içine denk gelen resmî tatil ve bayram günleri izin günü sayılıyor (ör. 2026-10-29 Perşembe, Cumhuriyet Bayramı: 1 gün). Seed'de Ayşe'nin 2026-07-06 → 2026-07-17 talebi 15 Temmuz Çarşamba'yı kapsıyor ve 10 gün sayılıyor (tatil listesi İK teyidi ister). Gün sayısı BR-5 ve BR-6'yı da etkiler: yalnızca tatile denk gelen talep bugün 1 gün sayılıp kabul ediliyor, düzeltme bunu da test etmeli. Takvimin kaynağı açık karar. Spec 0002 review'unda (R1-2) bulundu. | BR-3 |
 

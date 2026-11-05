@@ -8,12 +8,8 @@ Mimari: **tek bir Flask uygulaması, içeride dört katman** (`domain` / `servic
 bellekten SQL'e geçecek; ~200 satırlık bir uygulama için ayrı servisler gereksiz yük
 ([ADR 0001](decisions/0001-katmanli-monolit.md)).
 
-**Geçiş durumu:** Kod henüz bu yapıda değil — her şey tek dosyada (`app.py`, 2015). Taşıma ayrı bir
-refactor spec'iyle yapılır: önce karakterizasyon testleri, sonra taşıma (`workflows/refactor.md`).
-Bu spec `leavemanager/` paketini, `clock.py`'yi ve `create_app()`'i oluşturur, `lint-imports`
-adımını check'e ekler ve `pyproject.toml`'daki geçici `app.py` istisnasını kaldırır.
-O spec'e kadar `app.py` aşağıdaki kurallara uymaz; yeni kod uyar. İlk domain modülü
-`leavemanager/domain/leave_rules.py` (kıdem, izin günü, bakiye) spec 0002 ile geldi; `app.py` onu çağırır.
+Kod bu yapıdadır (spec 0004). `web`, `storage`'ı görmediği için (F3) nesneleri `app.py` birleştirir:
+`create_app(LeaveService(InMemoryRepository()))`.
 
 ## Modules / components and ownership
 
@@ -24,7 +20,7 @@ O spec'e kadar `app.py` aşağıdaki kurallara uymaz; yeni kod uyar. İlk domain
 | `leavemanager/storage` | Kalıcılık, bir repository arayüzü arkasında. Şimdi bellekte, sonra SQL (seçim ADR ile). | Personel ve talep kayıtları, ID üretimi |
 | `leavemanager/web` | HTTP ve HTML: formu oku, servisi çağır, Jinja şablonuyla göster, `DomainError`'u kullanıcı mesajına çevir. | Blueprint'ler, şablonlar, kullanıcıya görünen metin ve etiketler |
 | `leavemanager/clock.py` | "Bugün"ün tek kaynağı (Europe/Istanbul takvim günü). | Sistem saatine erişim |
-| `app.py` | Yalnızca başlatıcı: `create_app()` + çalıştırma. | — |
+| `app.py` | Yalnızca başlatıcı: katmanları birleştirir, `create_app(service)` + çalıştırma. | — |
 
 ## Communication rules
 - Yalnızca doğrudan fonksiyon çağrısı; event, mesaj kuyruğu veya arka plan işi yok.
@@ -35,8 +31,8 @@ O spec'e kadar `app.py` aşağıdaki kurallara uymaz; yeni kod uyar. İlk domain
   enjekte edilir.
 
 ## Forbidden dependencies (make them testable)
-Denetim `pyproject.toml`'da: F1–F5 import-linter kuralları, F6 ruff `TID251`. import-linter adımı
-`scripts/check.conf`'a paketi oluşturan refactor spec'iyle eklenir.
+Denetim `scripts/check`'te, ayarlar `pyproject.toml`'da: F1–F5 import-linter kuralları (`imports`
+adımı), F6 ruff `TID251`.
 
 - **F1** `domain` hiçbir katmanı (`services`, `storage`, `web`) ve `clock`'u import etmez; `flask`,
   `werkzeug`, `jinja2` ve veritabanı sürücülerini kullanmaz.
@@ -46,9 +42,9 @@ Denetim `pyproject.toml`'da: F1–F5 import-linter kuralları, F6 ruff `TID251`.
 - **F5** Veritabanı sürücüsü / ORM yalnızca `storage`'da. Liste şimdilik `sqlite3`; veritabanı
   ADR'ı seçilen sürücüyü bu kurala ekler.
 - **F6** `datetime.now()`, `datetime.today()`, `datetime.utcnow()` ve `date.today()` yalnızca
-  `leavemanager/clock.py`'de çağrılır. Geçici istisna: eski `app.py` (refactor kaldırır).
-- Dış bağımlılık: uygulama yalnızca `flask` ile çalışır; onaylı ama henüz eklenmemiş: Flask-WTF
-  (CSRF), `tzdata` (Windows'ta saat dilimi). Node.js/JavaScript derleme zinciri ve CDN script yok.
+  `leavemanager/clock.py`'de çağrılır.
+- Dış bağımlılık: uygulama `flask` ve `tzdata` (Windows'ta saat dilimi) ile çalışır; onaylı ama henüz
+  eklenmemiş: Flask-WTF (CSRF). Node.js/JavaScript derleme zinciri ve CDN script yok.
 
 ## Deliberately out of scope
 - REST API veya tek sayfalık ön yüz (SPA); sayfalar sunucuda üretilen HTML.

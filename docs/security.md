@@ -17,7 +17,7 @@ Her plan ve review bu tabana uyar. Bugünkü koddaki açıklar bilinen sapma **D
 ## Input & output
 - HTML yalnızca **Jinja şablon dosyalarından**, otomatik kaçışlama (autoescape) açıkken üretilir.
   `render_template_string`, string birleştirerek HTML üretmek ve kullanıcı verisiyle `|safe` /
-  `Markup` **yasak** (stored XSS — D9).
+  `Markup` **yasak** (stored XSS).
 - Her POST formunda CSRF koruması: **Flask-WTF `CSRFProtect`** (onaylı; D9 düzeltmesi ekler).
 - Girdi doğrulaması sınırda (`web`) tip dönüşümüyle, iş kuralı doğrulaması `domain`'de yapılır;
   geçersiz girdi kullanıcıya anlaşılır hata olarak döner (`docs/conventions.md`, Error handling).
@@ -41,7 +41,7 @@ Her plan ve review bu tabana uyar. Bugünkü koddaki açıklar bilinen sapma **D
   standart kütüphanede karşılığı yok.
 - Bilinen açıklar (CVE): CI'da ayrı `audit` job'ı, `pip-audit -r requirements.txt`. Ağ
   gerektirdiği için `scripts/check`'e girmez.
-- Onaylı ama henüz eklenmemiş: Flask-WTF (CSRF), `tzdata` (Windows saat dilimi).
+- Onaylı ama henüz eklenmemiş: Flask-WTF (CSRF).
 
 ## Review lens
 Security is a mandatory dimension of every independent review (see `prompts/review.md`), not a
