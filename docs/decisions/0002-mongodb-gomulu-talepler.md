@@ -95,9 +95,18 @@ Maliyet:
   bağımlılıkları içindir; sunucu ayrı bir hizmet olarak kullanılır. SSPL'in yükümlülüğü
   MongoDB'nin kendisini başkalarına hizmet olarak sunmakla ilgilidir, şirket içi kullanımı
   etkilemez.
-- `docs/architecture.md`'deki "SQL" ifadeleri ve F5 kuralının sürücü listesi (`sqlite3`) bu
-  kararla eskir. ADR 0001 kabul edilmiş olduğu için değişmez; `docs/architecture.md` ve F5'in
-  import-linter ayarı kalıcı veri spec'inde birlikte güncellenir.
+- Bu kararla eskiyen ifadeler. ADR 0001 kabul edilmiş olduğu için değişmez; aşağıdakiler kalıcı
+  veri spec'inde, ilgili kod ve ayarla birlikte güncellenir:
+  - `docs/architecture.md`: "SQL" geçen ifadeler (System overview, `storage` satırı),
+    "Veritabanı seçimi: … ADR ile" (Deliberately out of scope), dış bağımlılık listesi ve
+    F5'in sürücü listesi (`sqlite3`).
+  - `pyproject.toml` import-linter ayarı: F1 ve F5 kontratlarındaki `sqlite3`.
+  - Kod docstring'leri: `leavemanager/storage/__init__.py` ve
+    `leavemanager/storage/repository.py` ("sonra SQL").
+  - `.env.example` ve `docs/security.md` Secrets: `MONGODB_URI`.
+
+- Spec 0004'ün (`specs/done/`, değişmez) "SQL deposu gelince ortak sözleşme testi" notu bu
+  ADR'ın depo sözleşme testleriyle karşılanır.
 
 ## Alternatives considered
 - **MongoDB, ayrı `leave_requests` koleksiyonu ve çok belgeli transaction:** listeler ve talebi
