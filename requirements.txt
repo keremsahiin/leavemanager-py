@@ -2,5 +2,5 @@
 # Yeni paket: plan onayı + kontrol listesi (docs/security.md, Dependencies).
 flask==3.1.3
 flask-wtf==1.3.0  # CSRF (docs/security.md)
-wtforms==3.3.1  # flask-wtf'in bağımlılığı; 3.3.2 iki haftadan yeni olduğu için pin'li
+wtforms==3.3.1  # flask-wtf'in bağımlılığı; sürüm D9 CSRF onayıyla seçildi (3.3.2 o gün 10 günlüktü)
 tzdata==2026.6  # Windows'ta saat dilimi verisi yok (leavemanager/clock.py)
