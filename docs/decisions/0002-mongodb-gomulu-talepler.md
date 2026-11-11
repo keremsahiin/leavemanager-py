@@ -43,8 +43,10 @@ Bu kararın parçası olan ayrıntılar:
   gibi); bellekteki depoya sessizce düşmez. Replica set gerekmez, tek bir `mongod` yeter.
 - ODM ve Flask eklentisi kullanılmaz: depo, belgeleri domain'in dataclass'larına kendisi çevirir.
   `pymongo` ve `bson` yalnızca `storage`'da kullanılır (F5).
-- Kullanıcı girdisi sorguya yalnızca tipli değer (int, ISO tarih, str) olarak girer; istekten
-  gelen bir sözlük asla sorguya verilmez (NoSQL operatör enjeksiyonu).
+- Kullanıcı girdisi sorguya yalnızca tipli değer (int, ISO tarih, str) olarak ve yalnızca
+  eşitlik ya da aralık karşılaştırmasında girer. İstekten gelen bir sözlük asla sorguya
+  verilmez (NoSQL operatör enjeksiyonu); kullanıcı metni `$where`, `$function`, `$expr` ya da
+  `$regex` içinde kullanılmaz (JavaScript enjeksiyonu, ReDoS).
 - Test: HTTP ve servis testleri `InMemoryRepository` ile ağsız olarak `scripts/check`'te kalır.
   Depo sözleşme testleri aynı davranışı hem bellekteki depoda hem gerçek MongoDB'de sınar. Mongo
   kısmı CI'da ayrı bir job'da, bir MongoDB service container'ına karşı koşar; yerelde
@@ -125,6 +127,7 @@ Maliyet:
   - `docs/testing.md` The contract ve Evidence policy: Mongo job'ının kanıt istisnası.
   - `docs/testing.md` fixture sözleşmesi: `app.py` `MONGODB_URI` olmadan başlamaz; testler
     bellekteki depoyu başka yoldan alır.
+  - `docs/security.md` Input & output: veritabanı sorgusu kuralı (Decision'daki madde).
 
 - Spec 0004'ün (`specs/done/`, değişmez) "SQL deposu gelince ortak sözleşme testi" notu bu
   ADR'ın depo sözleşme testleriyle karşılanır.
