@@ -136,9 +136,10 @@ Maliyet:
 - **PostgreSQL:** bu veri şekline en doğal uyan seçenek; foreign key, kısıtlar ve
   `SELECT … FOR UPDATE` ile BR-5 hazır çözülür, raporlama SQL ile kolaydır. Hedef MongoDB olduğu
   için seçilmedi; hedef değişirse ilk aday.
-- **SQLite (standart kütüphane):** sunucusuz, yeni bağımlılık yok, testler bir dosya üzerinde
-  koşar. Tek dosya ve tek sunucu sınırı, eşzamanlı yazma ve yedekleme kısıtları var; hedefle de
-  uyuşmuyor. Reddedildi.
+- **SQLite (standart kütüphane):** hedefle uyuşmadığı için seçilmedi. Kendi başına bu ölçek için
+  yeterli bir seçenek: sunucusuz, yeni bağımlılık yok, testler bir dosya üzerinde koşar ve BR-5
+  tek bir yazma transaction'ıyla (`BEGIN IMMEDIATE`) kapanır. Sınırı tek dosya ve tek sunucu
+  olmasıdır; yüzlerce personel için bu bir engel değil. Reddedildi.
 - **ODM (MongoEngine vb.) ya da Flask-PyMongo:** ODM'in model katmanı domain'in dataclass'larını
   kopyalar; Flask eklentisi depoyu Flask'e bağlar ve katman sınırını bulanıklaştırır. Küçük bir
   depo için PyMongo ile elle eşleme daha az parça. Reddedildi.
