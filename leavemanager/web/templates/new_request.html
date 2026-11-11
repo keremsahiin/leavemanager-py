@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block content -%}
-<h3>Yeni Talep</h3><form method="post">
+<h3>Yeni Talep</h3><form method="post"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     Personel: <select name="employee_id">{% for employee in employees %}<option value='{{ employee.id }}'>{{ employee.name }}</option>{% endfor %}</select><br><br>
     Baslangic: <input type="date" name="start"><br><br>
     Bitis: <input type="date" name="end"><br><br>
