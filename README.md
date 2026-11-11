@@ -12,6 +12,9 @@
 
     .venv/Scripts/python app.py      # Windows (Linux/macOS: .venv/bin/python app.py)
 
+Geliştirirken debug için `FLASK_DEBUG=1` ortam değişkenini verin; kodda debug açılmaz
+(`docs/security.md`).
+
 Adres: http://localhost:5000
 
 ## Doğrulama

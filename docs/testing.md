@@ -27,8 +27,11 @@ ANEW kurallarıdır ve olduğu gibi geçerlidir.
   nesnesi sunmayı ve **her yüklemede temiz seed verisiyle başlamayı** sürdürmelidir; katmanlı
   pakete taşıyan refactor bu sözleşmeyi korunan davranış olarak alır. Sözleşme `app.py`'ye
   bağlanan testler içindir: `leavemanager/domain`'in saf fonksiyonları doğrudan çağrılabilir
-  (`tests/test_leave_rules.py`); depoya doğrudan yazmayı ya da saati vermeyi gerektiren senaryolar
-  uygulamayı `app.py`'nin kurduğu gibi katmanlardan kurar (`tests/test_composition.py`).
+  (`tests/test_leave_rules.py`); depoya doğrudan yazmayı, saati vermeyi ya da servise hata enjekte
+  etmeyi gerektiren senaryolar uygulamayı `app.py`'nin kurduğu gibi katmanlardan kurar
+  (`tests/test_composition.py`); başlatıcı
+  davranışı `app.py` script olarak çalıştırılıp sunucu çağrısı yakalanarak sınanır
+  (`tests/test_launcher.py`).
 - Baseline (karakterizasyon) testleri yalnızca HTTP konuşur ve sayfaları içerikten okur
   (`tests/pages.py`: tablo hücreleri, bağlantılar, form alanları, metnin rengi), etiket
   yapısından değil. Bilinen bir sapmayı sabitleyen test `test_d<n>_` ile başlar; o sapmanın

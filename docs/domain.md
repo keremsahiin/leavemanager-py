@@ -65,12 +65,13 @@ Kapananlar: **D3, D4** — spec 0002 (kıdem yıldönümü ve iş günü sayım�
 spec 0003 (bekleyen düşümü, izin yılı ve devir) · **D9'un stored XSS kısmı** — `fix/D9-reason-xss` · **D2** —
 `fix/D2-entitlement-15-years` · **D6, D7** — `fix/D6-D7-request-validation` · **D1** — spec 0004
 (yorum kalktı) · **D9'un `body|safe` kısmı** — spec 0004 (HTML şablon dosyalarından;
-`test_security_stored_html_is_escaped_on_output`).
+`test_security_stored_html_is_escaped_on_output`) · **D9'un debug ve hata sayfası kısmı** —
+`fix/D9-error-pages`.
 
 | # | Yer | Gözlem | Kural |
 |---|---|---|---|
 | D8 | `LeaveService.create_request` | Geçmiş tarihli talep herkese açık. | BR-7 |
-| D9 | genel | Güvenlik açıkları: kimlik doğrulama yok, CSRF yok, `debug=True` (`app.py`), hata mesajında dahili kod ve telefon (`leavemanager/web/pages.py`; yetersiz bakiye sayfası ayrıca HTTP 200 döner: düzeltme onu da 4xx yapmalı). Beklenmeyen hatada Flask'in İngilizce 500 sayfası çıkar, `debug=True` ile traceback de görünür: `debug=True` kalkarken Türkçe 500 sayfası eklenmeli (`docs/conventions.md`). Ayrıntı: `docs/security.md`. | — |
+| D9 | genel | Güvenlik açıkları: kimlik doğrulama yok, CSRF yok. Ayrıntı: `docs/security.md`. | — |
 | D12 | `/requests`, `/new` | Neden alanı herkese görünüyor, uyarı yok. | BR-9 |
 | D13 | `leavemanager/domain/models.py`, `leavemanager/storage/memory.py` (seed), `LeaveService`, `leavemanager/web/pages.py` | Durum kayıtta Türkçe metin (`"Onaylandi"` …). Kural: kayıtta `pending`/`approved`/`rejected`, `LeaveStatus` enum'u. | `docs/conventions.md` Naming |
 | D14 | `leave_balance` (`leavemanager/domain/leave_rules.py`) | Kalan = Devir + Hak − Kullanılan − Bekleyen, alt sınır yok: Kalan negatife düşebiliyor (ör. kıdem 0 iken onaylı talep varsa). Spec 0001 / plan 0001 R6'da bulundu. | I-1 |
