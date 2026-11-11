@@ -1,7 +1,8 @@
 """Katmanları doğrudan kuran testler — spec 0004.
 
-Bu senaryolar depoya doğrudan yazmayı ya da saati vermeyi gerektirir; uygulamayı ya da yalnızca
-servisi `app.py`'nin kurduğu gibi katmanlardan kurar (docs/testing.md, Fixture sözleşmesi).
+Bu senaryolar depoya doğrudan yazmayı, saati vermeyi ya da servise hata enjekte etmeyi gerektirir;
+uygulamayı ya da yalnızca servisi `app.py`'nin kurduğu gibi katmanlardan kurar (docs/testing.md,
+Fixture sözleşmesi).
 Kayıttaki durum sabitleri (`STATUS_*`) D13'e bağlıdır; o düzeltme bu dosyayı da bilinçli olarak
 değiştirir.
 """
