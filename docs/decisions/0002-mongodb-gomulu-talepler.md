@@ -60,8 +60,10 @@ Kazanç:
   `mongod` yettiği için geliştirme ve CI kurulumu hafif kalır.
 - Bir personelin bakiyesi tek belge okumasıyla hesaplanır: hesabın birimi (personel) belgenin
   birimiyle aynıdır.
-- Tamsayı ID'ler ve ISO tarihler sayesinde formlar, URL'ler, seed ve mevcut testler değişmez;
-  değişiklik yalnızca `storage` ve `app.py`'de kalır (ADR 0001'in vaadi).
+- Tamsayı ID'ler ve ISO tarihler sayesinde domain, web katmanı, formlar, URL'ler, seed içeriği
+  ve HTTP testleri değişmez. Değişen yerler: `storage`, `app.py`, `LeaveRepository` arayüzü ve
+  `LeaveService` (`create_request`: `version`'lı okuma, ardından koşullu yazma; `_balance`
+  bugün tüm talepleri tarıyor, tek personel belgesini okuyacak).
 - PyMongo resmî sürücüdür ve aktif bakılıyor (4.19.0, 2026-10-14, Apache-2.0); bağımlılık
   kontrol listesini (`docs/security.md`, Dependencies) geçer.
 - Hızlı, ağsız test döngüsü korunur; Mongo davranışı yine de her push ve PR'da gerçek sunucuda
@@ -75,6 +77,9 @@ Maliyet:
   index gerekir.
 - Talep ID'si ayrı bir sayaçtan gelir; sayaç arttıktan sonra ekleme başarısız olursa ID dizisinde
   boşluk kalır.
+- BR-5 atomikliği servis ile depo arasındaki sözleşmeye `version` taşır. ADR 0001'in "bellekten
+  kalıcı veriye geçiş yalnızca `storage`'ı değiştirir" vaadi bu noktada esner; depoyu doğrudan
+  çağıran testler (`tests/test_composition.py`) arayüzle birlikte değişir.
 - `version` çakışmasında ne yapılacağı (yeniden deneme ya da hata) depo ve servis sözleşmesine
   girer ve test edilmesi gereken yeni bir yoldur.
 - "Bütün test paketi `scripts/check`'te" sözleşmesinin bilinçli bir istisnası doğar: Mongo
