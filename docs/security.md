@@ -24,7 +24,7 @@ Her plan ve review bu tabana uyar. Bugünkü koddaki açıklar bilinen sapma **D
 - Kullanıcıya traceback, dahili hata kodu, sunucu/kişi bilgisi gösterilmez.
 - `debug=True` kodda **yasak** (Werkzeug debugger = uzaktan kod çalıştırma). Ruff `S201` uygulama
   `create_app` ile kurulduğunda bunu görmez: review'da kontrol edilir; `tests/test_launcher.py`
-  `python app.py`'nin debug açmadığını sınar.
+  `python app.py`'nin debug'ı yalnızca `FLASK_DEBUG=1` ile açtığını sınar.
   Debug yalnızca yerelde `FLASK_DEBUG=1` ortam değişkeniyle açılır.
 - Log'a kişisel veri ve neden metni yazılmaz; log'larda yalnızca kayıt ID'leri bulunur.
 
