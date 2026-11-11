@@ -22,12 +22,10 @@ ERROR_RESPONSES = {
     InvalidDate: ("Başlangıç ve bitiş tarihi geçerli olmalı.", 400),
     InvalidDateRange: ("Bitiş tarihi başlangıç tarihinden önce olamaz.", 400),
     NoLeaveDays: ("Seçilen aralıkta izin günü yok.", 400),
-    # Dahili metin ve 200: bilinen sapma D9 (docs/domain.md).
-    InsufficientBalance: (
-        "HATA: ERR-412 NullReferenceGibi - bakiye yetersiz. IT'ye bildirin: dahili 4127",
-        200,
-    ),
+    InsufficientBalance: ("Kalan izin bu talep için yeterli değil.", 400),
 }
+
+UNEXPECTED_ERROR = "Beklenmeyen bir hata oluştu."
 
 
 def read_employee_id(value: str | None) -> int:
@@ -47,6 +45,11 @@ def read_date(value: str | None) -> date:
 def show_domain_error(error: DomainError):
     message, status = ERROR_RESPONSES[type(error)]
     return render_template("error.html", message=message), status
+
+
+def show_unexpected_error(error: Exception):
+    """Ayrıntı kullanıcıya gösterilmez; Flask hatayı bu işleyiciden önce log'a yazar."""
+    return render_template("error.html", message=UNEXPECTED_ERROR), 500
 
 
 def create_pages(service: LeaveService) -> Blueprint:

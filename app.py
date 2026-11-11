@@ -7,4 +7,4 @@ from leavemanager.web import create_app
 app = create_app(LeaveService(InMemoryRepository()))
 
 if __name__ == "__main__":
-    app.run(port=5000, debug=True)  # bilinen sapma D9 (docs/domain.md)
+    app.run(port=5000)  # debug yalnızca FLASK_DEBUG=1 ile (docs/security.md)

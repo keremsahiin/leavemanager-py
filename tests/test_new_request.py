@@ -9,7 +9,7 @@ import pytest
 from flask.testing import FlaskClient
 from pages import counter, parse
 
-ERROR_TEXT = "HATA: ERR-412 NullReferenceGibi - bakiye yetersiz. IT'ye bildirin: dahili 4127"
+BALANCE_ERROR = "Kalan izin bu talep için yeterli değil."
 EMPLOYEE_ERROR = "Personel bulunamadı."
 DATE_ERROR = "Başlangıç ve bitiş tarihi geçerli olmalı."
 RANGE_ERROR = "Bitiş tarihi başlangıç tarihinden önce olamaz."
@@ -102,19 +102,13 @@ def test_missing_reason_saved_empty(client: FlaskClient) -> None:
         ("5", "2026-11-16", "2026-11-16"),  # Elif, Kalan 0, 1 gün
     ],
 )
-def test_d9_insufficient_balance_shows_internal_error_text(
+def test_br5_insufficient_balance_is_rejected(
     client: FlaskClient, employee_id: str, start: str, end: str
 ) -> None:
-    """PB-10 — bilinen sapma D9 (docs/domain.md, docs/security.md): hata mesajı dahili kod ve
-    dahili telefon numarası içerir.
-
-    Bugünkü davranışı, HTTP 200 dahil, sabitler; D9 düzeltmesi bu testi bilinçli olarak değiştirir.
-    """
+    """BR-5 (D9 düzeltmesi) — Kalan'ı aşan talep kaydedilmez; kullanıcı dahili kod ya da telefon
+    değil, anlaşılır bir mesaj görür (docs/security.md, Input & output)."""
     form = {"employee_id": employee_id, "start": start, "end": end, "reason": "x"}
-    response = client.post("/new", data=form)
-    assert response.status_code == 200
-    assert ERROR_TEXT in parse(response.text).text
-    assert len(request_rows(client)) == SEED_REQUEST_COUNT
+    assert_rejected(client, form, BALANCE_ERROR)
 
 
 def test_br5_equal_to_remaining_is_accepted(client: FlaskClient) -> None:

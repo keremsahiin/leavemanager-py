@@ -6,6 +6,7 @@ Kayıttaki durum sabitleri (`STATUS_*`) D13'e bağlıdır; o düzeltme bu dosyay
 değiştirir.
 """
 
+import logging
 from datetime import UTC, date, datetime
 
 import pytest
@@ -66,3 +67,21 @@ def test_br4_request_start_decides_leave_year() -> None:
     rows = LeaveService(repository, today=lambda: date(2025, 10, 25)).balance_rows()
     mehmet = next(row.balance for row in rows if row.employee.id == 2)
     assert (mehmet.carried_over, mehmet.used) == (67, 0)
+
+
+class FailingService(LeaveService):
+    def status_counts(self):
+        raise RuntimeError("gizli-ayrinti")
+
+
+def test_security_unexpected_error_shows_generic_page(caplog: pytest.LogCaptureFixture) -> None:
+    """docs/conventions.md, Error handling — beklenmeyen hatada kullanıcı yalnızca genel bir mesaj
+    ve 500 görür; ayrıntı kullanıcıya değil log'a gider."""
+    client = create_app(FailingService(InMemoryRepository())).test_client()
+    with caplog.at_level(logging.ERROR):
+        response = client.get("/")
+    assert response.status_code == 500
+    text = parse(response.text).text
+    assert text.endswith("Yeni Talep Beklenmeyen bir hata oluştu.")
+    assert "gizli-ayrinti" not in response.text
+    assert any(record.exc_info for record in caplog.records)
