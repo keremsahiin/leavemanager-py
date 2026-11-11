@@ -41,7 +41,8 @@ Bu kararın parçası olan ayrıntılar:
   `version`'ı artırır. Koşul tutmazsa (araya başka bir yazma girmişse) işlem yeniden okuyup dener
   ya da hata döner; hangisi olduğu kalıcı veri spec'inde belirlenir.
 - Bağlantı yalnızca `MONGODB_URI` ortam değişkeniyle kurulur; kodda varsayılan yoktur
-  (`docs/security.md`, Secrets). Replica set gerekmez, tek bir `mongod` yeter.
+  (`docs/security.md`, Secrets). Tanımlı değilse ya da boşsa uygulama başlamaz (`SECRET_KEY`
+  gibi); bellekteki depoya sessizce düşmez. Replica set gerekmez, tek bir `mongod` yeter.
 - ODM ve Flask eklentisi kullanılmaz: depo, belgeleri domain'in dataclass'larına kendisi çevirir.
   `pymongo` ve `bson` yalnızca `storage`'da kullanılır (F5).
 - Kullanıcı girdisi sorguya yalnızca tipli değer (int, ISO tarih, str) olarak girer; istekten
@@ -97,7 +98,11 @@ Maliyet:
   ama `audit` bilgilendiricidir; bu job zorunludur. Mongo'ya özgü bir hata yerelde değil, CI'da
   görünebilir.
 - Uygulamayı yerelde çalıştırmak için bir MongoDB gerekir (Windows'a Community Server ya da
-  erişilebilir bir sunucu); bugün `python app.py` tek başına çalışıyor.
+  erişilebilir bir sunucu): `MONGODB_URI` yoksa uygulama başlamaz. Bugün `python app.py` tek
+  başına çalışıyor.
+- Testler bugün `app.py`'yi yeniden yükleyerek uygulamayı kuruyor (`docs/testing.md`, fixture
+  sözleşmesi). `app.py` artık `MONGODB_URI` olmadan başlamayacağı için testlerin bellekteki
+  depoyu nasıl aldığı kalıcı veri spec'inde yeniden tanımlanır.
 - İşletme yükü: yedekleme (`mongodump` ya da yönetilen hizmet), kimlik doğrulama, TLS ve sürüm
   güncellemesi.
 - Yeni bağımlılıklar: `pymongo` ve onun bağımlılığı `dnspython` (son sürümü 2.9.2,
@@ -116,6 +121,8 @@ Maliyet:
     `leavemanager/storage/repository.py` ("sonra SQL").
   - `.env.example` ve `docs/security.md` Secrets: `MONGODB_URI`.
   - `docs/testing.md` The contract ve Evidence policy: Mongo job'ının kanıt istisnası.
+  - `docs/testing.md` fixture sözleşmesi: `app.py` `MONGODB_URI` olmadan başlamaz; testler
+    bellekteki depoyu başka yoldan alır.
 
 - Spec 0004'ün (`specs/done/`, değişmez) "SQL deposu gelince ortak sözleşme testi" notu bu
   ADR'ın depo sözleşme testleriyle karşılanır.
