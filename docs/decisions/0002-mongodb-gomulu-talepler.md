@@ -148,6 +148,12 @@ Maliyet:
 - **Her check'te geçici bir MongoDB (container):** tek komut ile gerçek sunucuyu birleştirir. Ama
   her geliştirici makinesinde Docker gerektirir (bugün yok), check'i yavaşlatır ve ANEW-0007
   açısından kalıntı riski taşır. Reddedildi.
+- **Mongo testleri `scripts/check`'in full profilinde, yerel bir `mongod`'a karşı:** uygulamayı
+  yerelde çalıştırmak için zaten bir MongoDB gerekecek; tek komut ile gerçek sunucu birleşir.
+  Ama check, ömrünü kendisinin yönetmediği bir servise bağlanır (`docs/testing.md`, Resource
+  hygiene): Mongo'su olmayan ya da kapalı olan makinede check kırmızı olur ve "check her yerde
+  aynı cevabı verir" ilkesi (`.github/workflows/check.yml`) bozulur; CI'daki `check` job'ı da
+  servise muhtaç olur. Proje sahibi ayrı CI job'ını seçti (2026-11-11). Reddedildi.
 
 ## Revisit triggers
 - Birden çok personeli aynı anda atomik olarak değiştiren bir kural (ekip kotası, izin devri) →
@@ -158,5 +164,6 @@ Maliyet:
 - Şirketin MongoDB hedefinden vazgeçmesi ya da üretimde MongoDB sağlanamaması → PostgreSQL ilk
   aday.
 - `version` çakışmalarının pratikte sık görülmesi → yazma modeli yeniden değerlendirilir.
-- Gerçek MongoDB'ye sadık, bakımlı bir yerel test aracının ya da geliştirici makinelerinde
-  Docker'ın bulunması → Mongo sözleşme testleri `scripts/check`'e alınır.
+- Gerçek MongoDB'ye sadık, bakımlı bir yerel test aracının, geliştirici makinelerinde Docker'ın
+  ya da check'in kendisinin başlatıp kapatabileceği bir yerel `mongod`'un bulunması → Mongo
+  sözleşme testleri `scripts/check`'e alınır.
