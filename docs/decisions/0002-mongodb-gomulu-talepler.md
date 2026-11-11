@@ -165,11 +165,14 @@ Maliyet:
 - Birden çok personeli aynı anda atomik olarak değiştiren bir kural (ekip kotası, izin devri) →
   transaction (replica set) ya da ilişkisel veritabanı.
 - Ağır raporlama ya da bordro/İK sistemiyle SQL tabanlı entegrasyon ihtiyacı.
-- Personel başına talep sayısının çok büyümesi (ör. saatlik izin kaydı) → talepler ayrı
+- Bir personel belgesinin 1 MB'ı aşması (MongoDB'nin belge sınırı 16 MB; yılda birkaç talep
+  birkaç KB eder) ya da saatlik izin gibi kayıt sayısını katlayan bir kural → talepler ayrı
   koleksiyona taşınır.
 - Şirketin MongoDB hedefinden vazgeçmesi ya da üretimde MongoDB sağlanamaması → PostgreSQL ilk
   aday.
-- `version` çakışmalarının pratikte sık görülmesi → yazma modeli yeniden değerlendirilir.
+- Bir `version` çakışmasının ayda birden fazla kez kullanıcıya hata olarak dönmesi (çakışmalar
+  log'a yalnızca kayıt ID'leriyle yazılır, `docs/security.md`) → yazma modeli yeniden
+  değerlendirilir.
 - Gerçek MongoDB'ye sadık, bakımlı bir yerel test aracının, geliştirici makinelerinde Docker'ın
   ya da check'in kendisinin başlatıp kapatabileceği bir yerel `mongod`'un bulunması → Mongo
   sözleşme testleri `scripts/check`'e alınır.
