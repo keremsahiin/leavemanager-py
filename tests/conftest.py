@@ -19,6 +19,14 @@ import app as app_module
 OBSERVED_TODAY = date(2026, 10, 25)
 
 
+@pytest.fixture(autouse=True)
+def no_flask_environment(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Geliştiricinin kabuğundaki `FLASK_DEBUG` ya da `FLASK_RUN_FROM_CLI` testlere sızmasın:
+    debug açık uygulama hataları işleyiciye değil teste fırlatır (docs/testing.md)."""
+    monkeypatch.delenv("FLASK_DEBUG", raising=False)
+    monkeypatch.delenv("FLASK_RUN_FROM_CLI", raising=False)
+
+
 @pytest.fixture
 def client_on() -> Iterator[Callable[[date], FlaskClient]]:
     """Verilen günü "bugün" olarak dondurur ve temiz seed verisiyle bir test istemcisi döndürür."""
