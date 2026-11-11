@@ -35,11 +35,18 @@ def test_security_launcher_enables_debug_only_with_flask_debug(
     assert options["use_reloader"] is debug
 
 
-def test_security_launcher_requires_secret_key(monkeypatch: pytest.MonkeyPatch) -> None:
-    """`SECRET_KEY` kodda varsayılan değer taşımaz: ortamda yoksa uygulama başlamaz."""
+@pytest.mark.parametrize("secret_key", [None, ""], ids=["unset", "empty"])
+def test_security_launcher_requires_secret_key(
+    monkeypatch: pytest.MonkeyPatch, secret_key: str | None
+) -> None:
+    """`SECRET_KEY` kodda varsayılan değer taşımaz: ortamda yoksa ya da boşsa (`.env.example`
+    olduğu gibi kullanılmışsa) uygulama başlamaz."""
     calls: list[object] = []
     monkeypatch.setattr(werkzeug.serving, "run_simple", lambda *a, **kw: calls.append(a))
-    monkeypatch.delenv("SECRET_KEY")
+    if secret_key is None:
+        monkeypatch.delenv("SECRET_KEY")
+    else:
+        monkeypatch.setenv("SECRET_KEY", secret_key)
     with pytest.raises(RuntimeError, match="SECRET_KEY"):
         runpy.run_path(str(APP_PY), run_name="__main__")
     assert calls == []
