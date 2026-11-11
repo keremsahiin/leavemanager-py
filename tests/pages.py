@@ -19,7 +19,8 @@ class Page:
     headers: list[list[str]] = field(default_factory=list)  # <th> içeren her satırın başlıkları
     links: list[tuple[str, str]] = field(default_factory=list)  # (href, metin)
     options: list[tuple[str, str]] = field(default_factory=list)  # (value, metin)
-    fields: list[str] = field(default_factory=list)  # form alanlarının name değerleri
+    fields: list[str] = field(default_factory=list)  # görünür form alanlarının name değerleri
+    hidden: dict[str, str] = field(default_factory=dict)  # gizli alanlar: name -> value
     labels: list[tuple[str, str]] = field(default_factory=list)  # (alanın önündeki metin, name)
     colored: list[tuple[str, str]] = field(default_factory=list)  # (metin, satır içi renk)
     text: str = ""  # görünen metin, boşluklar tekleştirilmiş
@@ -45,7 +46,9 @@ class _Parser(HTMLParser):
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
         attr = {k: v or "" for k, v in attrs}
-        if tag in ("input", "select", "textarea") and attr.get("name"):
+        if tag == "input" and attr.get("type") == "hidden" and attr.get("name"):
+            self.page.hidden[attr["name"]] = attr.get("value", "")
+        elif tag in ("input", "select", "textarea") and attr.get("name"):
             self.page.fields.append(attr["name"])
             self.page.labels.append((self._last_text, attr["name"]))
         if tag in _VOID:

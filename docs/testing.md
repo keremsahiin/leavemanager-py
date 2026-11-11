@@ -23,8 +23,10 @@ ANEW kurallarıdır ve olduğu gibi geçerlidir.
   sonrakine ulaşmaz (Resource hygiene, kural 5).
 - **Fixture sözleşmesi (spec 0001):** testlerin uygulamaya bağlandığı tek yer
   `tests/conftest.py`'dir. Her testte `app` modülünü yeniden yükler (`importlib.reload`) ve
-  `app.app.test_client()` kullanır. Bu yüzden `app.py` modül düzeyinde bir `app` (Flask)
-  nesnesi sunmayı ve **her yüklemede temiz seed verisiyle başlamayı** sürdürmelidir; katmanlı
+  `app.app.test_client()` kullanır. `client` formları tarayıcı gibi gönderir: önce formu açar,
+  gizli alanları (CSRF token'ı) ekler; CSRF reddi, kendiliğinden token eklemeyen `raw_client`
+  ile sınanır; `SECRET_KEY` her testte sabittir. Bu yüzden `app.py` modül düzeyinde bir `app`
+  (Flask) nesnesi sunmayı ve **her yüklemede temiz seed verisiyle başlamayı** sürdürmelidir; katmanlı
   pakete taşıyan refactor bu sözleşmeyi korunan davranış olarak alır. Sözleşme `app.py`'ye
   bağlanan testler içindir: `leavemanager/domain`'in saf fonksiyonları doğrudan çağrılabilir
   (`tests/test_leave_rules.py`); depoya doğrudan yazmayı, saati vermeyi ya da servise hata enjekte

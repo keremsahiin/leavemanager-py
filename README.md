@@ -10,7 +10,10 @@
 
 ## Çalıştırma
 
+    $env:SECRET_KEY = "<uzun rastgele değer>"   # PowerShell; bash: export SECRET_KEY=...
     .venv/Scripts/python app.py      # Windows (Linux/macOS: .venv/bin/python app.py)
+
+`SECRET_KEY` tanımlı değilse uygulama başlamaz; nasıl üretileceği `.env.example`'da.
 
 Geliştirirken debug için `FLASK_DEBUG=1` ortam değişkenini verin; kodda debug açılmaz
 (`docs/security.md`).

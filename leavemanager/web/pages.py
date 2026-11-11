@@ -26,6 +26,7 @@ ERROR_RESPONSES = {
 }
 
 UNEXPECTED_ERROR = "Beklenmeyen bir hata oluştu."
+CSRF_ERROR = "Form süresi doldu ya da geçersiz. Formu yeniden açıp tekrar deneyin."
 
 
 def read_employee_id(value: str | None) -> int:
@@ -45,6 +46,10 @@ def read_date(value: str | None) -> date:
 def show_domain_error(error: DomainError):
     message, status = ERROR_RESPONSES[type(error)]
     return render_template("error.html", message=message), status
+
+
+def show_csrf_error(error: Exception):
+    return render_template("error.html", message=CSRF_ERROR), 400
 
 
 def show_unexpected_error(error: Exception):

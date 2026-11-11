@@ -10,6 +10,7 @@ from flask.testing import FlaskClient
 from pages import counter, parse
 
 BALANCE_ERROR = "Kalan izin bu talep için yeterli değil."
+CSRF_ERROR = "Form süresi doldu ya da geçersiz. Formu yeniden açıp tekrar deneyin."
 EMPLOYEE_ERROR = "Personel bulunamadı."
 DATE_ERROR = "Başlangıç ve bitiş tarihi geçerli olmalı."
 RANGE_ERROR = "Bitiş tarihi başlangıç tarihinden önce olamaz."
@@ -202,3 +203,22 @@ def test_d8_past_dated_request_accepted(client: FlaskClient) -> None:
     form = {"employee_id": "2", "start": "2026-01-05", "end": "2026-01-06", "reason": "Gecmis"}
     assert_redirects_to_list(client.post("/new", data=form))
     assert request_rows(client)[-1][:4] == ["Mehmet Demir", "2026-01-05", "2026-01-06", "2"]
+
+
+@pytest.mark.parametrize("case", ["missing", "wrong", "other-session", "no-session"])
+def test_security_post_without_valid_csrf_token_is_rejected(
+    raw_client: FlaskClient, case: str
+) -> None:
+    """docs/security.md, Input & output — CSRF: geçerli token'ı olmayan POST kayıt oluşturmaz,
+    kullanıcı anlaşılır bir mesaj görür. Kullanıcı formu önceden açmıştır (oturumu vardır);
+    "other-session" başka bir tarayıcının formundaki token'ı gönderir, "no-session" ise formu
+    hiç açmamış (oturumsuz) bir istemcidir."""
+    form = {"employee_id": "2", "start": "2026-11-16", "end": "2026-11-18", "reason": "Test"}
+    if case != "no-session":
+        raw_client.get("/new")
+    if case == "wrong":
+        form["csrf_token"] = "yanlis"  # noqa: S105 — kasıtlı olarak geçersiz token
+    elif case in ("other-session", "no-session"):
+        other = raw_client.application.test_client()
+        form["csrf_token"] = parse(other.get("/new").text).hidden["csrf_token"]
+    assert_rejected(raw_client, form, CSRF_ERROR)

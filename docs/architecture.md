@@ -43,8 +43,8 @@ adımı), F6 ruff `TID251`.
   ADR'ı seçilen sürücüyü bu kurala ekler.
 - **F6** `datetime.now()`, `datetime.today()`, `datetime.utcnow()` ve `date.today()` yalnızca
   `leavemanager/clock.py`'de çağrılır.
-- Dış bağımlılık: uygulama `flask` ve `tzdata` (Windows'ta saat dilimi) ile çalışır; onaylı ama henüz
-  eklenmemiş: Flask-WTF (CSRF). Node.js/JavaScript derleme zinciri ve CDN script yok.
+- Dış bağımlılık: uygulama `flask`, `flask-wtf` (CSRF) ve `tzdata` (Windows'ta saat dilimi) ile
+  çalışır. Node.js/JavaScript derleme zinciri ve CDN script yok.
 
 ## Deliberately out of scope
 - REST API veya tek sayfalık ön yüz (SPA); sayfalar sunucuda üretilen HTML.
