@@ -49,8 +49,17 @@ Bu kararın parçası olan ayrıntılar:
 - Test: HTTP ve servis testleri `InMemoryRepository` ile ağsız olarak `scripts/check`'te kalır.
   Depo sözleşme testleri aynı davranışı hem bellekteki depoda hem gerçek MongoDB'de sınar. Mongo
   kısmı CI'da ayrı bir job'da, bir MongoDB service container'ına karşı koşar; yerelde
-  `MONGODB_URI` verilirse istenince çalıştırılır. Her test kendi geçici veritabanını açar ve
-  sonunda siler.
+  `MONGODB_URI` verilirse istenince çalıştırılır. Mongo testleri check'ten bir pytest
+  marker'ıyla ayrılır, ortam değişkenine bağlı skip ile değil (seçiciyle bölme kuralı:
+  `docs/testing.md`, Two speeds 4); ayrıntısı spec'te. Her test kendi geçici veritabanını açar
+  ve sonunda siler.
+- Kanıt: Mongo job'ı, `doctor` ve `check` gibi zorunlu bir durum kontrolüdür (branch koruması
+  uygulanmadığı için öteki job'lar gibi çalışma disipliniyle tutulur, `docs/git.md`). Yalnızca
+  gerçek MongoDB'de kanıtlanabilen kriterlerin (ör. eşzamanlı iki talebin Kalan'ı aşamaması)
+  kanıtı o job'ın CI koşusudur: koşu bağlantısı ve commit SHA'sı. Bu, ANEW-0009'un
+  ("`scripts/check` tek kanıttır") ve `docs/testing.md`'nin The contract ile Evidence policy
+  bölümlerinin bu proje için bilinçli bir inceltmesidir; geri kalan her kriterin kanıtı yine
+  `scripts/check`'tir.
 - Üretim barındırması (şirket içi ya da yönetilen bulut) canlıya geçişte kararlaştırılır. O
   kararda verinin hangi ülkede tutulduğu (KVKK) açıkça yazılır.
 
@@ -82,9 +91,11 @@ Maliyet:
   çağıran testler (`tests/test_composition.py`) arayüzle birlikte değişir.
 - `version` çakışmasında ne yapılacağı (yeniden deneme ya da hata) depo ve servis sözleşmesine
   girer ve test edilmesi gereken yeni bir yoldur.
-- "Bütün test paketi `scripts/check`'te" sözleşmesinin bilinçli bir istisnası doğar: Mongo
-  sözleşme testleri yerel check'te değil, CI job'ında koşar (`audit` job'ı emsal). Mongo'ya özgü
-  bir hata yerelde değil, CI'da görünebilir.
+- "Bütün test paketi `scripts/check`'te" ve "tek kanıt `scripts/check`" sözleşmelerinin
+  (ANEW-0009, `docs/testing.md`) bilinçli bir istisnası doğar: Mongo sözleşme testleri yerel
+  check'te değil, CI job'ında koşar ve kanıt taşır. Ağ gerektiren ayrı job'ın emsali `audit`'tir,
+  ama `audit` bilgilendiricidir; bu job zorunludur. Mongo'ya özgü bir hata yerelde değil, CI'da
+  görünebilir.
 - Uygulamayı yerelde çalıştırmak için bir MongoDB gerekir (Windows'a Community Server ya da
   erişilebilir bir sunucu); bugün `python app.py` tek başına çalışıyor.
 - İşletme yükü: yedekleme (`mongodump` ya da yönetilen hizmet), kimlik doğrulama, TLS ve sürüm
@@ -104,6 +115,7 @@ Maliyet:
   - Kod docstring'leri: `leavemanager/storage/__init__.py` ve
     `leavemanager/storage/repository.py` ("sonra SQL").
   - `.env.example` ve `docs/security.md` Secrets: `MONGODB_URI`.
+  - `docs/testing.md` The contract ve Evidence policy: Mongo job'ının kanıt istisnası.
 
 - Spec 0004'ün (`specs/done/`, değişmez) "SQL deposu gelince ortak sözleşme testi" notu bu
   ADR'ın depo sözleşme testleriyle karşılanır.
