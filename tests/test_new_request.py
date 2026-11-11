@@ -205,16 +205,20 @@ def test_d8_past_dated_request_accepted(client: FlaskClient) -> None:
     assert request_rows(client)[-1][:4] == ["Mehmet Demir", "2026-01-05", "2026-01-06", "2"]
 
 
-@pytest.mark.parametrize("case", ["missing", "wrong", "other-session"])
+@pytest.mark.parametrize("case", ["missing", "wrong", "other-session", "no-session"])
 def test_security_post_without_valid_csrf_token_is_rejected(
     raw_client: FlaskClient, case: str
 ) -> None:
     """docs/security.md, Input & output — CSRF: geçerli token'ı olmayan POST kayıt oluşturmaz,
-    kullanıcı anlaşılır bir mesaj görür. "other-session": başka bir tarayıcının formundaki token."""
+    kullanıcı anlaşılır bir mesaj görür. Kullanıcı formu önceden açmıştır (oturumu vardır);
+    "other-session" başka bir tarayıcının formundaki token'ı gönderir, "no-session" ise formu
+    hiç açmamış (oturumsuz) bir istemcidir."""
     form = {"employee_id": "2", "start": "2026-11-16", "end": "2026-11-18", "reason": "Test"}
+    if case != "no-session":
+        raw_client.get("/new")
     if case == "wrong":
         form["csrf_token"] = "yanlis"  # noqa: S105 — kasıtlı olarak geçersiz token
-    elif case == "other-session":
+    elif case in ("other-session", "no-session"):
         other = raw_client.application.test_client()
-        form["csrf_token"] = parse(other.get("/new").text).hidden.get("csrf_token", "yok")
+        form["csrf_token"] = parse(other.get("/new").text).hidden["csrf_token"]
     assert_rejected(raw_client, form, CSRF_ERROR)
