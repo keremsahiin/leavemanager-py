@@ -32,10 +32,7 @@ taleplerini bir dizi olarak içerir; yeni talep, belgenin `version` alanına ko�
 güncellemeyle eklenir, böylece BR-5 bakiye kontrolü ile yazma atomik olur.
 
 Bu kararın parçası olan ayrıntılar:
-- Koleksiyonlar: `employees` (personel bilgisi, `requests` dizisi, `version`) ve `counters`
-  (talep ID sayacı).
-- ID'ler tamsayıdır: personelin `_id`'si bugünkü ID'sidir; talep ID'si `counters` üzerinden
-  atomik `$inc` ile üretilir.
+- ID'ler tamsayıdır: personelin `_id`'si bugünkü ID'sidir; talep ID'leri de tamsayıdır.
 - Tarihler ISO 8601 takvim günü metnidir (`"2026-11-16"`): domain Europe/Istanbul takvim günüyle
   çalışır, BSON Date ise bir UTC anıdır.
 - Talep ekleyen ya da değiştiren her yazma, personel belgesini okuduğu `version` ile koşullar ve
@@ -53,8 +50,7 @@ Bu kararın parçası olan ayrıntılar:
   kısmı CI'da ayrı bir job'da, bir MongoDB service container'ına karşı koşar; yerelde
   `MONGODB_URI` verilirse istenince çalıştırılır. Mongo testleri check'ten bir pytest
   marker'ıyla ayrılır, ortam değişkenine bağlı skip ile değil (seçiciyle bölme kuralı:
-  `docs/testing.md`, Two speeds 4); ayrıntısı spec'te. Her test kendi geçici veritabanını açar
-  ve sonunda siler.
+  `docs/testing.md`, Two speeds 4); ayrıntısı spec'te.
 - Kanıt: Mongo job'ı, `doctor` ve `check` gibi zorunlu bir durum kontrolüdür (branch koruması
   uygulanmadığı için öteki job'lar gibi çalışma disipliniyle tutulur, `docs/git.md`). Yalnızca
   gerçek MongoDB'de kanıtlanabilen kriterlerin (ör. eşzamanlı iki talebin Kalan'ı aşamaması)
@@ -64,6 +60,11 @@ Bu kararın parçası olan ayrıntılar:
   `scripts/check`'tir.
 - Üretim barındırması (şirket içi ya da yönetilen bulut) canlıya geçişte kararlaştırılır. O
   kararda verinin hangi ülkede tutulduğu (KVKK) açıkça yazılır.
+
+İlk tasarım (bağlayıcı değil; kalıcı veri spec'inde kesinleşir): koleksiyonlar `employees`
+(personel bilgisi, `requests` dizisi, `version`) ve `counters` (talep ID sayacı, atomik
+`$inc`); her test kendi geçici veritabanını açıp siler (`docs/testing.md`, Resource hygiene 5
+en az koşu başına temiz veritabanı ister).
 
 ## Consequences
 Kazanç:
@@ -86,7 +87,7 @@ Maliyet:
 - Tüm talepleri listelemek (`/requests`, sayaçlar, ileride onay ekranı) `$unwind` aggregation
   ister. Bir talebi ID'siyle bulmak personel belgelerinin içinde aramak demektir; dizi alanına
   index gerekir.
-- Talep ID'si ayrı bir sayaçtan gelir; sayaç arttıktan sonra ekleme başarısız olursa ID dizisinde
+- İlk tasarımda talep ID'si ayrı bir sayaçtan gelir; sayaç arttıktan sonra ekleme başarısız olursa ID dizisinde
   boşluk kalır.
 - BR-5 atomikliği servis ile depo arasındaki sözleşmeye `version` taşır. ADR 0001'in "bellekten
   kalıcı veriye geçiş yalnızca `storage`'ı değiştirir" vaadi bu noktada esner; depoyu doğrudan
