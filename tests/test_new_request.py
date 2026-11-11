@@ -10,7 +10,7 @@ from flask.testing import FlaskClient
 from pages import counter, parse
 
 BALANCE_ERROR = "Kalan izin bu talep için yeterli değil."
-CSRF_ERROR = "Form süresi doldu ya da geçersiz. Sayfayı yenileyip yeniden deneyin."
+CSRF_ERROR = "Form süresi doldu ya da geçersiz. Formu yeniden açıp tekrar deneyin."
 EMPLOYEE_ERROR = "Personel bulunamadı."
 DATE_ERROR = "Başlangıç ve bitiş tarihi geçerli olmalı."
 RANGE_ERROR = "Bitiş tarihi başlangıç tarihinden önce olamaz."

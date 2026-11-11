@@ -26,7 +26,7 @@ ERROR_RESPONSES = {
 }
 
 UNEXPECTED_ERROR = "Beklenmeyen bir hata oluştu."
-CSRF_ERROR = "Form süresi doldu ya da geçersiz. Sayfayı yenileyip yeniden deneyin."
+CSRF_ERROR = "Form süresi doldu ya da geçersiz. Formu yeniden açıp tekrar deneyin."
 
 
 def read_employee_id(value: str | None) -> int:
