@@ -4,13 +4,14 @@
 - Date: 2026-11-11
 
 ## Context
-- Veri bugün bellekte (`InMemoryRepository`) ve her başlatmada seed'e döner. Yol haritasında
-  sıradaki iş kalıcı veri. [ADR 0001](0001-katmanli-monolit.md) kalıcılığı `storage` katmanına,
+- Veri bugün bellekte (`InMemoryRepository`) ve her başlatmada seed'e döner. Proje sahibinin
+  seçtiği sırada (2026-11-11) bir sonraki iş kalıcı veri; D9'un kimlik doğrulama kısmı ondan
+  sonra gelir. [ADR 0001](0001-katmanli-monolit.md) kalıcılığı `storage` katmanına,
   bir repository arayüzünün (`LeaveRepository`) arkasına koydu ve seçimi bir ADR'a bıraktı.
   0001 "bellekten SQL'e geçiş" diye yazdı; bu ADR o ifadeyi MongoDB olarak netleştirir. 0001'in
   kararı (katmanlar ve çağrı yönü) değişmez.
 - Hedef: uygulama MongoDB üzerinde çalışacak (proje sahibinin kararı, 2026-11-11).
-- Veri küçük ve ilişkisel biçimli: personel (seed'de 5, canlıda en fazla yüzler) ve personele
+- Veri küçük ve ilişkisel biçimli: personel (seed'de 5; canlıda tahminen en fazla birkaç yüz) ve personele
   bağlı izin talepleri. Bakiye (BR-4) her seferinde o personelin talepleri üzerinden hesaplanır.
 - BR-5: `LeaveService.create_request` önce bakiyeyi okur, sonra yazar. Aynı personel için aynı
   anda gelen iki talep ikisi de kontrolü geçip Kalan'ı aşabilir. Bellekte bu yarış görünmüyordu;
