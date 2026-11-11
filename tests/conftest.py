@@ -33,7 +33,10 @@ def clean_environment(monkeypatch: pytest.MonkeyPatch) -> None:
 
 class FormClient(FlaskClient):
     """Tarayıcı gibi davranır: POST'tan önce formu açar ve formdaki gizli alanları (CSRF token'ı)
-    gönderir. CSRF'nin kendisi `raw_client` ile sınanır."""
+    gönderir. CSRF'nin kendisi `raw_client` ile sınanır.
+
+    Sınır: token'ı her zaman `/new`'den alır. İkinci bir POST formu eklenince token o formun kendi
+    sayfasından alınmalı; yoksa token'sız bir form testlerde fark edilmez."""
 
     def post(self, *args, **kwargs):
         hidden = parse(self.get("/new").text).hidden
