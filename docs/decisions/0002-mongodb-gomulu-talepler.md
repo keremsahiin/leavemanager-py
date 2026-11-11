@@ -11,8 +11,9 @@
   0001 "bellekten SQL'e geçiş" diye yazdı; bu ADR o ifadeyi MongoDB olarak netleştirir. 0001'in
   kararı (katmanlar ve çağrı yönü) değişmez.
 - Hedef: uygulama MongoDB üzerinde çalışacak (proje sahibinin kararı, 2026-11-11).
-- Veri küçük ve ilişkisel biçimli: personel (seed'de 5; canlıda tahminen en fazla birkaç yüz) ve personele
-  bağlı izin talepleri. Bakiye (BR-4) her seferinde o personelin talepleri üzerinden hesaplanır.
+- Veri küçük ve ilişkisel biçimli: personel (seed'de 5; canlıda tahminen en fazla birkaç yüz)
+  ve personele bağlı izin talepleri. Bakiye (BR-4) her seferinde o personelin talepleri üzerinden
+  hesaplanır.
 - BR-5: `LeaveService.create_request` önce bakiyeyi okur, sonra yazar. Aynı personel için aynı
   anda gelen iki talep ikisi de kontrolü geçip Kalan'ı aşabilir. Bellekte bu yarış görünmüyordu;
   kalıcı ve aynı anda birden çok isteğe hizmet eden bir uygulamada gerçek olur. Model, bakiye
@@ -82,6 +83,8 @@ Kazanç:
   kontrol listesini (`docs/security.md`, Dependencies) geçer.
 - Hızlı, ağsız test döngüsü korunur; Mongo davranışı yine de her push ve PR'da gerçek sunucuda
   sınanır.
+- Spec 0004'ün (`specs/done/`, değişmez) "SQL deposu gelince ortak sözleşme testi" notu, bu
+  ADR'ın depo sözleşme testleriyle karşılanır.
 
 Maliyet:
 - Veri ilişkisel biçimli ama foreign key, şema ve tekillik kısıtlarını veritabanı değil kod
@@ -89,8 +92,8 @@ Maliyet:
 - Tüm talepleri listelemek (`/requests`, sayaçlar, ileride onay ekranı) `$unwind` aggregation
   ister. Bir talebi ID'siyle bulmak personel belgelerinin içinde aramak demektir; dizi alanına
   index gerekir.
-- İlk tasarımda talep ID'si ayrı bir sayaçtan gelir; sayaç arttıktan sonra ekleme başarısız olursa ID dizisinde
-  boşluk kalır.
+- İlk tasarımda talep ID'si ayrı bir sayaçtan gelir; sayaç arttıktan sonra ekleme başarısız
+  olursa ID dizisinde boşluk kalır.
 - BR-5 atomikliği servis ile depo arasındaki sözleşmeye `version` taşır. ADR 0001'in "bellekten
   kalıcı veriye geçiş yalnızca `storage`'ı değiştirir" vaadi bu noktada esner; depoyu doğrudan
   çağıran testler (`tests/test_composition.py`) arayüzle birlikte değişir.
@@ -128,9 +131,6 @@ Maliyet:
   - `docs/testing.md` fixture sözleşmesi: `app.py` `MONGODB_URI` olmadan başlamaz; testler
     bellekteki depoyu başka yoldan alır.
   - `docs/security.md` Input & output: veritabanı sorgusu kuralı (Decision'daki madde).
-
-- Spec 0004'ün (`specs/done/`, değişmez) "SQL deposu gelince ortak sözleşme testi" notu bu
-  ADR'ın depo sözleşme testleriyle karşılanır.
 
 ## Alternatives considered
 - **MongoDB, ayrı `leave_requests` koleksiyonu ve çok belgeli transaction:** listeler ve talebi
