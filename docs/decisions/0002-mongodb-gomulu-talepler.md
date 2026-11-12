@@ -100,9 +100,10 @@ Maliyet:
   ve yol kalıcı veri spec'inde belirlenir.
 - İlk tasarımda talep ID'si ayrı bir sayaçtan gelir; sayaç arttıktan sonra ekleme başarısız
   olursa ID dizisinde boşluk kalır.
-- BR-5 atomikliği servis ile depo arasındaki sözleşmeye `version` taşır. ADR 0001'in "bellekten
-  kalıcı veriye geçiş yalnızca `storage`'ı değiştirir" vaadi bu noktada esner; depoyu doğrudan
-  çağıran testler (`tests/test_composition.py`) arayüzle birlikte değişir.
+- BR-5 atomikliği servis ile depo arasındaki sözleşmeye `version` taşır. ADR 0001'in
+  "bellekten SQL'e geçiş yalnızca `storage`'ı değiştirir" vaadi (SQL yerine MongoDB için de) bu
+  noktada esner; depoyu doğrudan çağıran testler (`tests/test_composition.py`) arayüzle birlikte
+  değişir.
 - `version` çakışmasında ne yapılacağı (yeniden deneme ya da hata) depo ve servis sözleşmesine
   girer ve test edilmesi gereken yeni bir yoldur.
 - "Bütün test paketi `scripts/check`'te" ve "tek kanıt `scripts/check`" sözleşmelerinin
