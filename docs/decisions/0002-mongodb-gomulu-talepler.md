@@ -127,16 +127,18 @@ Maliyet:
 - Bu kararla eskiyen ifadeler. ADR 0001 kabul edilmiş olduğu için değişmez; aşağıdakiler kalıcı
   veri spec'inde, ilgili kod ve ayarla birlikte güncellenir:
   - `docs/architecture.md`: "SQL" geçen ifadeler (System overview, `storage` satırı),
-    "Veritabanı seçimi: … ADR ile" (Deliberately out of scope), dış bağımlılık listesi ve
-    F5'in sürücü listesi (`sqlite3`).
+    `create_app(LeaveService(InMemoryRepository()))` örneği, "Veritabanı seçimi: … ADR ile"
+    (Deliberately out of scope), dış bağımlılık listesi ve F5'in sürücü listesi (`sqlite3`).
   - `pyproject.toml` import-linter ayarı: F1 ve F5 kontratlarındaki `sqlite3`.
   - Kod docstring'leri: `leavemanager/storage/__init__.py` ve
     `leavemanager/storage/repository.py` ("sonra SQL").
   - `.env.example` ve `docs/security.md` Secrets: `MONGODB_URI`.
+  - `README.md` Çalıştırma: `MONGODB_URI` ve yerelde bir MongoDB gereksinimi.
   - `docs/testing.md` The contract ve Evidence policy: Mongo job'ının kanıt istisnası.
   - `docs/testing.md` fixture sözleşmesi: `app.py` `MONGODB_URI` olmadan başlamaz; testler
     bellekteki depoyu başka yoldan alır.
   - `docs/security.md` Input & output: veritabanı sorgusu kuralı (Decision'daki madde).
+  - `docs/git.md` Pull requests: Mongo job'ı zorunlu durum kontrollerinin arasına girer.
 
 ## Alternatives considered
 - **MongoDB, ayrı `leave_requests` koleksiyonu ve çok belgeli transaction:** listeler ve talebi
