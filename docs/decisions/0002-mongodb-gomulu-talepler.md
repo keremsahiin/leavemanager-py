@@ -93,6 +93,11 @@ Maliyet:
 - Tüm talepleri listelemek (`/requests`, sayaçlar, ileride onay ekranı) `$unwind` aggregation
   ister. Bir talebi ID'siyle bulmak personel belgelerinin içinde aramak demektir; dizi alanına
   index gerekir.
+- Belge boyutu kullanıcı metnine bağlıdır: reddedilen talepler de dizide kalır ve neden alanının
+  bugün üst sınırı yok (Flask alan başına 500 KB'a kadar kabul eder). Kimlik doğrulama gelene
+  kadar herkes bir personelin belgesini MongoDB'nin 16 MB sınırına doldurup o personele yazmayı
+  durdurabilir. Neden alanına bir üst sınır ve belge boyutu ölçümü (`$bsonSize`) gerekir; değer
+  ve yol kalıcı veri spec'inde belirlenir.
 - İlk tasarımda talep ID'si ayrı bir sayaçtan gelir; sayaç arttıktan sonra ekleme başarısız
   olursa ID dizisinde boşluk kalır.
 - BR-5 atomikliği servis ile depo arasındaki sözleşmeye `version` taşır. ADR 0001'in "bellekten
@@ -166,9 +171,9 @@ Maliyet:
 - Birden çok personeli aynı anda atomik olarak değiştiren bir kural (ekip kotası, izin devri) →
   transaction (replica set) ya da ilişkisel veritabanı.
 - Ağır raporlama ya da bordro/İK sistemiyle SQL tabanlı entegrasyon ihtiyacı.
-- Bir personel belgesinin 1 MB'ı aşması (MongoDB'nin belge sınırı 16 MB; yılda birkaç talep
-  birkaç KB eder) ya da saatlik izin gibi kayıt sayısını katlayan bir kural → talepler ayrı
-  koleksiyona taşınır.
+- Bir personel belgesinin 1 MB'ı aşması (MongoDB'nin belge sınırı 16 MB; neden alanı sınırlıyken
+  yılda birkaç talep birkaç KB eder) ya da saatlik izin gibi kayıt sayısını katlayan bir kural →
+  talepler ayrı koleksiyona taşınır.
 - Şirketin MongoDB hedefinden vazgeçmesi ya da üretimde MongoDB sağlanamaması → PostgreSQL ilk
   aday.
 - Bir `version` çakışmasının ayda birden fazla kez kullanıcıya hata olarak dönmesi (çakışmalar
