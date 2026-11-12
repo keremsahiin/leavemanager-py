@@ -64,10 +64,11 @@ Bu kararın parçası olan ayrıntılar:
 - Üretim barındırması (şirket içi ya da yönetilen bulut) canlıya geçişte kararlaştırılır. O
   kararda verinin hangi ülkede tutulduğu (KVKK) açıkça yazılır.
 
-İlk tasarım (bağlayıcı değil; kalıcı veri spec'inde kesinleşir): koleksiyonlar `employees`
-(personel bilgisi, `requests` dizisi, `version`) ve `counters` (talep ID sayacı, atomik
-`$inc`); her test kendi geçici veritabanını açıp siler (`docs/testing.md`, Resource hygiene 5
-en az koşu başına temiz veritabanı ister).
+İlk tasarım (kalıcı veri spec'inde kesinleşir). Gömülü talep dizisi ve `version` alanı yukarıdaki
+kararın parçasıdır; bağlayıcı olmayan yalnızca adlar ve şu mekanizmalardır: koleksiyonlar
+`employees` (personel bilgisi, `requests` dizisi, `version`) ve `counters` (talep ID sayacı,
+atomik `$inc`); her test kendi geçici veritabanını açıp siler (`docs/testing.md`, Resource
+hygiene 5 en az koşu başına temiz veritabanı ister).
 
 ## Consequences
 Kazanç:
