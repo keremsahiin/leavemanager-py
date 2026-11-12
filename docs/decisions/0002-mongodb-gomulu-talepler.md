@@ -57,10 +57,10 @@ Bu kararın parçası olan ayrıntılar:
 - Kanıt: Mongo job'ı, `doctor` ve `check` gibi zorunlu bir durum kontrolüdür (branch koruması
   uygulanmadığı için öteki job'lar gibi çalışma disipliniyle tutulur, `docs/git.md`). Yalnızca
   gerçek MongoDB'de kanıtlanabilen kriterlerin (ör. eşzamanlı iki talebin Kalan'ı aşamaması)
-  kanıtı o job'ın CI koşusudur: koşu bağlantısı ve commit SHA'sı. Bu, ANEW-0009'un
-  ("`scripts/check` tek kanıttır") ve `docs/testing.md`'nin The contract ile Evidence policy
-  bölümlerinin bu proje için bilinçli bir inceltmesidir; geri kalan her kriterin kanıtı yine
-  `scripts/check`'tir.
+  kanıtı o job'ın CI koşusudur: koşu bağlantısı ve commit SHA'sı. Bu,
+  [ANEW-0009](anew/ANEW-0009-two-speeds-one-contract.md)'un ("`scripts/check` tek kanıttır") ve
+  `docs/testing.md`'nin The contract ile Evidence policy bölümlerinin bu proje için bilinçli bir
+  inceltmesidir; geri kalan her kriterin kanıtı yine `scripts/check`'tir.
 - Üretim barındırması (şirket içi ya da yönetilen bulut) canlıya geçişte kararlaştırılır. O
   kararda verinin hangi ülkede tutulduğu (KVKK) açıkça yazılır.
 
