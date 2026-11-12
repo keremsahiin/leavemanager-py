@@ -75,10 +75,11 @@ Kazanç:
   `mongod` yettiği için geliştirme ve CI kurulumu hafif kalır.
 - Bir personelin bakiyesi tek belge okumasıyla hesaplanır: hesabın birimi (personel) belgenin
   birimiyle aynıdır.
-- Tamsayı ID'ler ve ISO tarihler sayesinde domain, web katmanı, formlar, URL'ler, seed içeriği
-  ve HTTP testleri değişmez. Değişen yerler: `storage`, `app.py`, `LeaveRepository` arayüzü ve
-  `LeaveService` (`create_request`: `version`'lı okuma, ardından koşullu yazma; `_balance`
-  bugün tüm talepleri tarıyor, tek personel belgesini okuyacak).
+- Tamsayı ID'ler ve ISO tarihler sayesinde domain'in hesapları, web'in sayfaları, formlar,
+  URL'ler, seed içeriği ve HTTP testleri değişmez. Değişen yerler: `storage`, `app.py`,
+  `LeaveRepository` arayüzü ve `LeaveService` (`create_request`: `version`'lı okuma, ardından
+  koşullu yazma; `_balance` bugün tüm talepleri tarıyor, tek personel belgesini okuyacak). Spec
+  çakışmada hata dönmeyi seçerse domain'e bir `DomainError`, web'e de onun Türkçe mesajı eklenir.
 - PyMongo resmî sürücüdür ve aktif bakılıyor (4.19.0, 2026-10-14, Apache-2.0); bağımlılık
   kontrol listesini (`docs/security.md`, Dependencies) geçer.
 - Hızlı, ağsız test döngüsü korunur; Mongo davranışı yine de her push ve PR'da gerçek sunucuda
