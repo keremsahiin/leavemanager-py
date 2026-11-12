@@ -38,7 +38,9 @@ Bu kararın parçası olan ayrıntılar:
   çalışır, BSON Date ise bir UTC anıdır.
 - Talep ekleyen ya da değiştiren her yazma, personel belgesini okuduğu `version` ile koşullar ve
   `version`'ı artırır. Koşul tutmazsa (araya başka bir yazma girmişse) işlem yeniden okuyup dener
-  ya da hata döner; hangisi olduğu kalıcı veri spec'inde belirlenir.
+  ya da hata döner; hangisi olduğu kalıcı veri spec'inde belirlenir. Her çakışma log'a yalnızca
+  kayıt ID'leriyle yazılır (`docs/security.md`); bu kayıt, revisit trigger'larından birinin
+  ölçüsüdür.
 - Bağlantı yalnızca `MONGODB_URI` ortam değişkeniyle kurulur; kodda varsayılan yoktur
   (`docs/security.md`, Secrets). Tanımlı değilse ya da boşsa uygulama başlamaz (`SECRET_KEY`
   gibi); bellekteki depoya sessizce düşmez. Replica set gerekmez, tek bir `mongod` yeter.
@@ -180,9 +182,8 @@ Maliyet:
   talepler ayrı koleksiyona taşınır.
 - Şirketin MongoDB hedefinden vazgeçmesi ya da üretimde MongoDB sağlanamaması → PostgreSQL ilk
   aday.
-- Bir `version` çakışmasının ayda birden fazla kez kullanıcıya hata olarak dönmesi (çakışmalar
-  log'a yalnızca kayıt ID'leriyle yazılır, `docs/security.md`) → yazma modeli yeniden
-  değerlendirilir.
+- Bir `version` çakışmasının ayda birden fazla kez kullanıcıya hata olarak dönmesi (ölçü:
+  Decision'daki çakışma log'u) → yazma modeli yeniden değerlendirilir.
 - Gerçek MongoDB'ye sadık, bakımlı bir yerel test aracının, geliştirici makinelerinde Docker'ın
   ya da check'in kendisinin başlatıp kapatabileceği bir yerel `mongod`'un bulunması → Mongo
   sözleşme testleri `scripts/check`'e alınır.
